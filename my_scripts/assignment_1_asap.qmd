@@ -121,11 +121,18 @@ ggplot(data, aes(x=sum, y=prob)) +
 
 Which of the following events is more likely?
 
-- [ ] A. The sum is $\geq$ `12`, *given* that at least one of the dice shows a `4`.
+- [X] A. The sum is $\geq$ `12`, *given* that at least one of the dice shows a `4`.
 - [ ] B. The sum is $\leq$ `10`, *given* that at least one of the dice shows a `5`.
 
 ```{r}
-# write code here
+perm$total <- rowSums(perm)
+num_1 <- nrow(perm[(perm$total>=12) & (perm$V1==4 | perm$V2==4 | perm$V3==4),])/nrow(perm)
+den_1 <- nrow(perm[(perm$V1==4 | perm$V2==4 | perm$V3==4),])/nrow(perm)
+num_1/den_1
+
+num_2 <- nrow(perm[(perm$total<=10) & (perm$V1==5 | perm$V2==5 | perm$V3==5),])/nrow(perm)
+den_2 <- nrow(perm[(perm$V1==5 | perm$V2==5 | perm$V3==5),])/nrow(perm)
+num_2/den_2
 ```
 
 
