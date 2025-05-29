@@ -94,7 +94,11 @@ Each row should represent one possible outcome.
 Print the first/last 10 rows and the total number of possible outcomes to the output.
 
 ```{r}
-# write code here
+library(gtools)
+perm <- as.data.frame(permutations(6,3, repeats.allowed = TRUE))
+print(head(perm, 10))
+print(tail(perm, 10))
+print(nrow(perm))
 ```
 
 ### Task 1.2
@@ -103,7 +107,14 @@ Create a data frame showing all possible sums that can result from throwing the 
 Print the data frame to the output and visualize the distribution in a plot.
 
 ```{r}
-#write code here
+library(ggplot2)
+data <- as.data.frame(table(rowSums(perm)))
+colnames(data) <- c("sum", "prob")
+data$prob <- data$prob/sum(data$prob)
+print(data)
+
+ggplot(data, aes(x=sum, y=prob)) + 
+  geom_bar(stat = "identity")
 ```
 
 ### Task 1.3
