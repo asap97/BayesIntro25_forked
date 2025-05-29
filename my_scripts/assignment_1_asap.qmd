@@ -148,7 +148,16 @@ Compute the probability of all possible numbers of occurrence of land, given the
 Report the results in a summary table and a plot and indicate whether the plot shows a probability distribution or a likelihood function.
 
 ```{r}
-#write code here
+
+
+
+ggplot(df, aes(x = land, y = likelihood)) +
+  geom_line(size = 1.2) +
+  labs(title = "Probability of the proportion of land being 0.3",
+       x = "Times land is observed",
+       y = "Probability") +
+  theme_minimal()
+
 ```
 
 ### Task 2.2
@@ -159,7 +168,32 @@ For each of these candidates, compute the probability of this observation.
 Report the results in a summary table and a plot and indicate whether the plot shows a probability distribution or a likelihood function.
 
 ```{r}
-#write code here
+# Es como la que esta en sessio_05 compute_post, da exactamente igual
+counter_prob_1 <- function(data, cp){
+  L <- sum(data == "L")
+  W <- sum(data == "W")
+  probs <- (cp)^L * ((1 - cp))^W
+  probs <- probs/sum(probs)
+  data.frame(cp, probs)
+}
+
+
+data <- c(rep("W", 8), "L","L")
+#data <- c(rep("W", 12), rep("L",30))
+cp_seq <- seq(0, 1, 0.1)
+results <- counter_prob_1(data, cp = cp_seq)
+results$probs <- round(results$probs, 3)
+
+
+library(ggplot2)
+library(tidyr)
+
+ggplot(results, aes(x = cp, y = probs)) +
+  geom_line(size = 1.2) +
+  labs(title = "Likelihood of candidate proportions of Land",
+       x = "Proportion of Land (cp)",
+       y = "Likelihood") +
+  theme_minimal()
 ```
 
 ### Task 2.3
@@ -168,7 +202,19 @@ For each candidate proportion of land, compute the probability of all possible n
 Report the results in a summary table, showing the probability distributions as columns and the likelihood functions as rows.
 
 ```{r}
-#write code here
+cp_seq <- seq(0, 1, 0.1)
+obs <- c(0:10)
+prob_df <- data.frame(obs)
+
+for (cp in cp_seq) {
+  probs <- (cp^obs) * ((1 - cp)^(10 - obs))
+  probs <- probs / sum(probs)
+  probs <- round(probs, 3)
+  prob_df <- cbind(prob_df,probs)
+  }
+
+colnames(prob_df) <- c("land",cp_seq)
+prob_df
 ```
 
 

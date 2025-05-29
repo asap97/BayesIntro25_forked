@@ -7,7 +7,7 @@
 
 #Write a function that simulates the input data
 #n is number of tosses, p is probability of land
-simu <- function(n = 10, p = 0.5) {
+simu <- function(n = 10, p = 0.3) {
   ifelse(runif(n) < p, "L", "W")
 }
 #ex <- simu(n = 1000, p = 0.45)
@@ -40,6 +40,7 @@ counter_prob_1 <- function(data, cp){
   probs <- probs/sum(probs)
   data.frame(cp, probs)
 }
+
 
 
 cp_seq <- seq(0, 1, 0.1)
