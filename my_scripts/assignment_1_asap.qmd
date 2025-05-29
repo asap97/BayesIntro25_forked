@@ -206,8 +206,10 @@ Report the results in a summary table, showing the probability distributions as 
 
 ```{r}
 cp_seq <- seq(0, 1, 0.1)
-obs <- c(0:10)
-prob_df <- data.frame(obs)
+land <- c(0:10)
+prob_df <- data.frame(matrix(0, nrow=length(land), ncol=length(cp_seq)+1))
+colnames(prob_df) <- c("land", as.character(cp_seq))
+prob_df$land <- land
 
 for (cp in cp_seq) {
   probs <- (cp^obs) * ((1 - cp)^(10 - obs))
