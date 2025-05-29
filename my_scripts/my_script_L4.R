@@ -37,14 +37,12 @@ counter_prob_1 <- function(data, cp){
   L <- sum(data == "L")
   W <- sum(data == "W")
   probs <- (cp)^L * ((1 - cp))^W
-  probs <- probs/sum(probs)
-  data.frame(cp, probs)
+  #probs <- probs/sum(probs)
+  data.frame(L, W, cp, probs)
 }
 
 
-
 cp_seq <- seq(0, 1, 0.1)
-
 
 # Initial data (prior knowledge) with give proportion of land
 old_data <- c("W", "L")
