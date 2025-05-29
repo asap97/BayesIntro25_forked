@@ -22,7 +22,7 @@ counter <- function(data, cp){
   L <- sum(data=="L")
   W <- sum(data=="W")
   ways <- (cp*sides)^L * ((1-cp)*sides)^W 
-  data.frame(cp, ways) 
+  data.frame(cp, ways)
   
 }
 
