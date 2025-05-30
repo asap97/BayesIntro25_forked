@@ -79,6 +79,8 @@ Timestamp: `r format(time, "%Y-%m-%d %H:%M:%S %Z")`
 #| warning: false
 # load packages here
 library(tidyverse)
+library(ggplot2)
+library(gtools)
 ```
 
 
@@ -148,17 +150,17 @@ Compute the probability of all possible numbers of occurrence of land, given the
 Report the results in a summary table and a plot and indicate whether the plot shows a probability distribution or a likelihood function.
 
 ```{r}
-# i is the number of times that land is observed, so 10-i is the number of times water is observed
+# i is the number of times that land is observed, 
+# so 10-i is the number of times water is observed
 df <- data.frame(land = 0:10, probs = rep(0,11))
 for (i in 0:10){
   df[i+1, 2] <- dbinom(i, size = 10, prob = 0.3) 
 }
 df
-#sum(df$probs)
 
 library(ggplot2)
 ggplot(df, aes(x = land, y = probs)) +
-  geom_line(size = 1.2) +
+  geom_line(linewidth = 1.2) +
   labs(title = "Probability of observing land given p=0.3",
        x = "Times land is observed",
        y = "Probability") +
