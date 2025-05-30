@@ -1,7 +1,7 @@
 ---
 title: "Assignment 1"
 subtitle: "Introduction to Bayesian Data Analysis 2025"
-author: 'Ana Sofia Acevedo (#StudentID)'
+author: 'Ana Sofia Acevedo (03805441)'
 format: pdf
 ---
 
@@ -44,14 +44,14 @@ collaboration <- FALSE # FALSE: Individual work; TRUE: Collaboration
 <!--If you collaborated, check the 'Yes' box and enter the collaborator name--> 
 
 - [ ] Yes (Collaborator name) 
-- [x] No
+- [X] No
 
 
 **2. Declaration of Authorship**
 
 <!--Before handing in the assignment, check the box by adding an 'X" to the box -->
 
-- [ ] `r ifelse(collaboration==FALSE, individual, collab)`
+- [X] `r ifelse(collaboration==FALSE, individual, collab)`
 
 
 **3. System Information**
@@ -63,7 +63,7 @@ time <- Sys.time()
 ```
 
 
-- [ ] I confirm that I generated the submitted PDF report myself using `r info$R.version$version.string` and `Quarto`/`RMarkdown`. 
+- [X] I confirm that I generated the submitted PDF report myself using `r info$R.version$version.string` and `Quarto`/`RMarkdown`. 
 
 
 Machine stamp: `r info$platform`
@@ -96,7 +96,6 @@ Each row should represent one possible outcome.
 Print the first/last 10 rows and the total number of possible outcomes to the output.
 
 ```{r}
-library(gtools)
 perm <- as.data.frame(permutations(6,3, repeats.allowed = TRUE))
 print(head(perm, 10))
 print(tail(perm, 10))
@@ -109,7 +108,6 @@ Create a data frame showing all possible sums that can result from throwing the 
 Print the data frame to the output and visualize the distribution in a plot.
 
 ```{r}
-library(ggplot2)
 data <- as.data.frame(table(rowSums(perm)))
 colnames(data) <- c("sum", "prob")
 data$prob <- data$prob/sum(data$prob)
@@ -158,7 +156,6 @@ for (i in 0:10){
 }
 df
 
-library(ggplot2)
 ggplot(df, aes(x = land, y = probs)) +
   geom_line(linewidth = 1.2) +
   labs(title = "Probability of observing land given p=0.3",
@@ -200,9 +197,6 @@ df_1$probs <- df_1$probs / sum(df_1$probs)
 df_1$probs <- round(df_1$probs, 3)
 df_1
 
-
-library(ggplot2)
-library(tidyr)
 
 ggplot(results, aes(x = cp, y = probs)) +
   geom_line(size = 1.2) +
