@@ -154,10 +154,12 @@ for (i in 0:10){
   df[i+1, 2] <- dbinom(i, size = 10, prob = 0.3) 
 }
 df
+#sum(df$probs)
 
+library(ggplot2)
 ggplot(df, aes(x = land, y = probs)) +
   geom_line(size = 1.2) +
-  labs(title = "Probability of the proportion of land being 0.3",
+  labs(title = "Probability of observing land given p=0.3",
        x = "Times land is observed",
        y = "Probability") +
   theme_minimal()
@@ -182,10 +184,19 @@ counter_prob_1 <- function(data, cp){
 }
 
 data <- c(rep("W", 8), "L","L")
-#data <- c(rep("W", 12), rep("L",30))
 cp_seq <- seq(0, 1, 0.1)
 results <- counter_prob_1(data, cp = cp_seq)
 results$probs <- round(results$probs, 3)
+
+df_1 <- data.frame(cp = seq(0, 1, 0.1), probs = rep(0,11))
+count <- 1
+for (i in seq(0, 1, 0.1)){
+  df_1[count,2] <- dbinom(2, size = 10, prob = i) 
+  count <- count+1
+}
+df_1$probs <- df_1$probs / sum(df_1$probs)
+df_1$probs <- round(df_1$probs, 3)
+df_1
 
 
 library(ggplot2)
@@ -207,19 +218,15 @@ Report the results in a summary table, showing the probability distributions as 
 ```{r}
 cp_seq <- seq(0, 1, 0.1)
 land <- c(0:10)
-prob_df <- data.frame(matrix(0, nrow=length(land), ncol=length(cp_seq)+1))
-colnames(prob_df) <- c("land", as.character(cp_seq))
-prob_df$land <- land
+df_2 <- data.frame(matrix(0, nrow=length(land), ncol=length(cp_seq)+1))
+colnames(df_2) <- c("land", as.character(cp_seq))
+df_2$land <- land
 
-for (cp in cp_seq) {
-  probs <- (cp^obs) * ((1 - cp)^(10 - obs))
-  probs <- probs / sum(probs)
-  probs <- round(probs, 3)
-  prob_df <- cbind(prob_df,probs)
+for (i in land){
+  for (j in cp_seq){
+    df_2[i+1,as.character(j)] <- dbinom(i, size = 10, prob = j) 
   }
-
-colnames(prob_df) <- c("land",cp_seq)
-prob_df
+}
 ```
 
 

@@ -120,3 +120,33 @@ pi_bounds <- quantile(s, probs = c((1 - percent)/2, 1 - (1 - percent)/2))
 library(HDInterval)
 hdi_interval<- hdi(s, credMass = percent)
 
+
+
+
+
+#------------------------------------------------------------------
+df <- data.frame(land = 0:10, probs = rep(0,11))
+for (i in 0:10){
+  df[i+1, 2] <- dbinom(i, size = 10, prob = 0.3) 
+}
+df
+
+df_1 <- data.frame(cp = seq(0, 1, 0.1), probs = rep(0,11))
+count <- 1
+for (i in seq(0, 1, 0.1)){
+  #print(count)
+  df_1[count,2] <- dbinom(2, size = 10, prob = i) 
+  count <- count+1
+}
+
+cp_seq <- seq(0, 1, 0.1)
+land <- c(0:10)
+df_2 <- data.frame(matrix(0, nrow=length(land), ncol=length(cp_seq)+1))
+colnames(df_2) <- c("land", as.character(cp_seq))
+df_2$land <- land
+
+for (i in land){
+  for (j in cp_seq){
+    df_2[i+1,as.character(j)] <- dbinom(i, size = 10, prob = j) 
+  }
+}
