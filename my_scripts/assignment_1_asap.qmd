@@ -95,6 +95,8 @@ Create a data frame with all possible combinations (outcomes) that can result fr
 Each row should represent one possible outcome.
 Print the first/last 10 rows and the total number of possible outcomes to the output.
 
+##### Answer
+The number of possible outcomes can be computed as a permutation, where repeated numbers are allowed. The library *gtools* has a function that does exactly this. 
 ```{r}
 perm <- as.data.frame(permutations(6,3, repeats.allowed = TRUE))
 print(head(perm, 10))
@@ -107,6 +109,8 @@ print(nrow(perm))
 Create a data frame showing all possible sums that can result from throwing the three dice (e.g., if all three dice show a `1`, the sum is `3`) along with their probabilities.
 Print the data frame to the output and visualize the distribution in a plot.
 
+##### Answer
+
 ```{r}
 data <- as.data.frame(table(rowSums(perm)))
 colnames(data) <- c("sum", "prob")
@@ -114,7 +118,11 @@ data$prob <- data$prob/sum(data$prob)
 print(data)
 
 ggplot(data, aes(x=sum, y=prob)) + 
-  geom_bar(stat = "identity")
+  geom_bar(stat = "identity") +
+  labs(title = "Probability of possible sums after throwing 3 dice",
+       x = "Sum result",
+       y = "Probability") +
+  theme_minimal()
 ```
 
 ### Task 1.3
@@ -124,12 +132,20 @@ Which of the following events is more likely?
 - [X] A. The sum is $\geq$ `12`, *given* that at least one of the dice shows a `4`.
 - [ ] B. The sum is $\leq$ `10`, *given* that at least one of the dice shows a `5`.
 
+##### Answer
+From Bayes' theorem, the probabilities for each sum given the respective conditions can be calculated. In this sense, 
+$$
+P(A|B) = \frac{P(A\cap B)}{P(B)}
+$$
+The probability for the first scenario is 
 ```{r}
 perm$total <- rowSums(perm)
 num_1 <- nrow(perm[(perm$total>=12) & (perm$V1==4 | perm$V2==4 | perm$V3==4),])/nrow(perm)
 den_1 <- nrow(perm[(perm$V1==4 | perm$V2==4 | perm$V3==4),])/nrow(perm)
 num_1/den_1
-
+```
+The probability for the second scenario is 
+```{r}
 num_2 <- nrow(perm[(perm$total<=10) & (perm$V1==5 | perm$V2==5 | perm$V3==5),])/nrow(perm)
 den_2 <- nrow(perm[(perm$V1==5 | perm$V2==5 | perm$V3==5),])/nrow(perm)
 num_2/den_2
@@ -147,6 +163,9 @@ For Task 2.1-2.3, assume you toss a globe `10` times, leading to either land or 
 Compute the probability of all possible numbers of occurrence of land, given the candidate proportion of `.3`.
 Report the results in a summary table and a plot and indicate whether the plot shows a probability distribution or a likelihood function.
 
+##### Answer 
+Since the candidate proportion of land (that is, the parameter) is fixed, the plot shows a probability distribution of the number of times land is observed given the proportion. 
+
 ```{r}
 # i is the number of times that land is observed, 
 # so 10-i is the number of times water is observed
@@ -154,7 +173,8 @@ df <- data.frame(land = 0:10, probs = rep(0,11))
 for (i in 0:10){
   df[i+1, 2] <- dbinom(i, size = 10, prob = 0.3) 
 }
-df
+df$probs <- round(df$probs, 3)
+print(df)
 
 ggplot(df, aes(x = land, y = probs)) +
   geom_line(linewidth = 1.2) +
@@ -172,8 +192,11 @@ Take the candidate proportions of land `cp =` `r seq(0,1,.1)`.
 For each of these candidates, compute the probability of this observation. 
 Report the results in a summary table and a plot and indicate whether the plot shows a probability distribution or a likelihood function.
 
+##### Answer
+Since in this case the observation is fixed and the parameter is variable, the plot shows a likelihood function that is normalized. To solve this task, I compared the results I go using the code I wrote during class (first part), and then compared it to what I got by using the binomial distribution function.
+
 ```{r}
-# Es como la que esta en session_05 compute_post, da exactamente igual
+# Coded during class
 counter_prob_1 <- function(data, cp){
   L <- sum(data == "L")
   W <- sum(data == "W")
@@ -186,7 +209,9 @@ data <- c(rep("W", 8), "L","L")
 cp_seq <- seq(0, 1, 0.1)
 results <- counter_prob_1(data, cp = cp_seq)
 results$probs <- round(results$probs, 3)
+print(results)
 
+# Code using the binomial distribution function
 df_1 <- data.frame(cp = seq(0, 1, 0.1), probs = rep(0,11))
 count <- 1
 for (i in seq(0, 1, 0.1)){
@@ -195,9 +220,9 @@ for (i in seq(0, 1, 0.1)){
 }
 df_1$probs <- df_1$probs / sum(df_1$probs)
 df_1$probs <- round(df_1$probs, 3)
-df_1
+print(df_1)
 
-
+# Plot with the results
 ggplot(results, aes(x = cp, y = probs)) +
   geom_line(size = 1.2) +
   labs(title = "Likelihood of candidate proportions of Land",
@@ -211,6 +236,9 @@ ggplot(results, aes(x = cp, y = probs)) +
 For each candidate proportion of land, compute the probability of all possible number of occurrences of land.
 Report the results in a summary table, showing the probability distributions as columns and the likelihood functions as rows.
 
+##### Answer
+Since the rows represent the likelihood function, they do not need to necessarily be normalized to add up to 1, while the columns represent a probability distribution function and thus have to add up to 1. Therefore, the binomial distribution function was used. 
+
 ```{r}
 cp_seq <- seq(0, 1, 0.1)
 land <- c(0:10)
@@ -223,6 +251,7 @@ for (i in land){
     df_2[i+1,as.character(j)] <- dbinom(i, size = 10, prob = j) 
   }
 }
+print(df_2)
 ```
 
 
