@@ -224,7 +224,7 @@ print(df_1)
 
 # Plot with the results
 ggplot(results, aes(x = cp, y = probs)) +
-  geom_line(size = 1.2) +
+  geom_line(linewidth = 1.2) +
   labs(title = "Likelihood of candidate proportions of Land",
        x = "Proportion of Land (cp)",
        y = "Likelihood") +
@@ -249,8 +249,10 @@ df_2$land <- land
 for (i in land){
   for (j in cp_seq){
     df_2[i+1,as.character(j)] <- dbinom(i, size = 10, prob = j) 
+    df_2[i+1,as.character(j)] <- round(df_2[i+1,as.character(j)], 3)
   }
 }
+
 print(df_2)
 ```
 
