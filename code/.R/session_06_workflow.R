@@ -11,7 +11,7 @@ d <- dunif(range, min = x_min, max = x_max) # densities
 UNI <- data.frame(range, d)
 
 ggplot(UNI, aes(x = range, y = d)) +
-  geom_line(size = 2, color = "#ff02ff") +
+  geom_line(linewidth = 2, color = "#ff02ff") +
   labs(x = "x", 
        y = "Density") 
 
@@ -24,7 +24,7 @@ d <- dnorm(range, mean = 0, sd = 1) # densities
 NORM <- data.frame(range, d)
 
 ggplot(NORM, aes(x = range, y = d)) +
-  geom_line(size = 2, color = "#ff02ff") +
+  geom_line(linewidth = 2, color = "#ff02ff") +
   labs(x = expression(mu_j),
        y = "Density") 
 
@@ -32,11 +32,11 @@ ggplot(NORM, aes(x = range, y = d)) +
 # beta
 
 range <- seq(0, 1, length.out = 100)
-d <- dbeta(range, shape1 = 2, shape2 = 50)
+d <- dbeta(range, shape1 =10, shape2 = 10)
 BETA <- data.frame(range, d)
 
 ggplot(BETA, aes(x = range, y = d)) +
-  geom_line(size = 2, color = "#ff02ff" ) +
+  geom_line(linewidth = 2, color = "#ff02ff" ) +
   labs(x = "x", 
        y = "Density")
 
@@ -50,7 +50,7 @@ d <- dexp(range, rate = 1)
 EXP <- data.frame(range, d)
 
 ggplot(EXP, aes(x = range, y = d)) +
-  geom_line(size = 2, color = "#ff02ff") +
+  geom_line(linewidth = 2, color = "#ff02ff") +
   labs(x = "x", 
        y = "Density") 
 
@@ -64,7 +64,7 @@ d <- dgamma(range, shape = 2, rate = 1)
 GAMMA <- data.frame(range, d)
 
 ggplot(GAMMA, aes(x = range, y = d)) +
-  geom_line(size = 2, color = "#ff02ff") +
+  geom_line(linewidth = 2, color = "#ff02ff") +
   labs(x = "x", 
        y = "Density") 
 
