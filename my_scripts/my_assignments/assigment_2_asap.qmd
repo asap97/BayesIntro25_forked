@@ -78,7 +78,6 @@ Timestamp: `r format(time, "%Y-%m-%d %H:%M:%S %Z")`
 ```{r}
 library(tidyverse)
 library(ggplot2)
-library(gtools)
 ```
 
 
