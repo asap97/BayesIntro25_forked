@@ -1,0 +1,185 @@
+---
+title: "Assignment 2"
+subtitle: "Introduction to Bayesian Data Analysis 2025"
+author: 'Student (#StudentID)'
+format: pdf
+editor_options: 
+  chunk_output_type: console
+---
+
+<!--Preamble-->
+
+## Preamble 
+
+  - **Points**: Assignment 2 comprises of 6 tasks, 2 points each (12 in total). 2 points are obtained for complete and correct answers. 1 point is obtained for a proper approach or if only part of the task is solved.
+  
+  - **Submission**: Hand in the assignment as a PDF `Markdown` report. The report should show the results, the code that produced the results, and additional text or comment. The report should appear clean and be uploaded on Moodle until Wednesday, June 11, 9:45 am.
+  
+  - **Collaboration**: Reports can be handed in as team work (max. 2 people). When working in teams, declare this on page 2. However, each collaborator needs to hand in a report via Moodle, stating their name, student number (p. 1), and their machine specification (p. 2).  
+  
+  - **Permitted and Prohibited**: You may use materials from this class (e.g., slides, code on GitHub) as well as online forums such as [Stack Overflow](https://Stackoverflow.com/questions) to write your code. However, you are not allowed to post questions from the assignment online or prompt them (including paraphrases) to LLMs/chatbots. All use of LLMs/chatbots is generally not allowed. Solutions may not be shared with other students from the class (except 1 potential collaborator).
+  
+  
+\newpage
+
+
+## Authorship Information
+
+
+```{r}
+#| include: false
+individual <- 'I certify that this assignment represents my own work. I have not used any unauthorized or unacknowledged aids as stated in the preamble, including free or commercial systems or services offered on the internet or text generating systems embedded into software. I did not copy code from someone else nor did I share my code with someone else.' 
+
+collab <- 'I certify that this assignment represents collaborative work by me and my collaborator listed below. I confirm that both contributed equally to this assignment and that we are equally responsible for the entirety of this report that we will receive the same grade on this report. I have not used any unauthorized or unacknowledged aids as stated in the preamble, including free or commercial systems or services offered on the internet or text generating systems embedded into software. I did not copy code nor did I share my code with someone other than my collaborator. I also found no indication for any such misconduct by collaborator.'
+```
+
+
+**1. Declaration of Collaboration**
+
+<!--If you collaborated, set collaboration <- TRUE --> 
+
+```{r}
+#| include: false
+collaboration <- FALSE # FALSE: Individual work; TRUE: Collaboration
+```
+
+<!--If you collaborated, check the 'Yes' box and enter the collaborator name--> 
+
+- [ ] Yes (Collaborator name) 
+- [x] No
+
+
+**2. Declaration of Authorship**
+
+<!--Before handing in the assignment, check the box by adding an 'X" to the box -->
+
+- [ ] `r ifelse(collaboration==FALSE, individual, collab)`
+
+
+**3. System Information**
+
+```{r}
+#| include: false
+info <-sessionInfo()
+time <- Sys.time()
+```
+
+
+- [ ] I confirm that I generated the submitted PDF report myself using `r info$R.version$version.string` and `Quarto`/`RMarkdown`. 
+
+
+Machine stamp: `r info$platform`
+
+Timestamp: `r format(time, "%Y-%m-%d %H:%M:%S %Z")`
+
+
+\newpage
+  
+```{r}
+#load packages here
+```
+
+
+# Task Set 1
+
+For tasks 1.1-1.2, suppose there are 3 companies, Company A to C. 
+Company A has a customer satisfaction rate of .60, Company B of .80, and Company C of .83. 
+Further suppose that you receive 10 customer reviews (8 positive, 2 negative) for the same company, but you don’t know for which company.
+Assume that Company A is three times more likely to obtain reviews than Company B and C.  
+
+## Task 1.1
+
+Which company maximizes the likelihood of the 10 reviews and which company has the highest posterior probability that it was rated? 
+
+```{r}
+#write code here
+```
+
+## Task 1.2
+
+Suppose you receive 10 more reviews (3 positive and 7 negative). 
+Show that the posterior probability that Company B received the reviews decreases by $\approx$ 30 percentage points, when considering all 20 rather than only the first 10 reviews. 
+To obtain the updated posterior probability, only compute the likelihood of the 10 most recent reviews. 
+
+```{r}
+#write code here
+```
+
+\newpage
+
+# Task Set 2
+
+For tasks 2.1 and 2.2, suppose there are Factory A, Factory B and Factory C, producing the same product.
+The head company receives 50% of its shipments from A and 25% each from B and C. 
+Even though the machines, processes, and standards are virtually identical, the factories differ in
+their defect rates. 
+Shipments from Factory A entail defective products 10% of the time, shipments from Factory B 15% of the time, and shipments from Factory C 20% .
+
+## Task 2.1
+
+You receive a shipment from one of the factories, and upon inspection, you find that the shipment contains defective products.
+Compute the probability that the next shipment from this company will also contain defective products.
+
+```{r}
+#write code here
+```
+
+
+## Task 2.2
+
+Suppose the R&D department came up with a Machine Learning algorithm that (imperfectly) identifies the factory based on the shipped products.
+But the classification algorithm is imperfect. 
+This is the information you have about the algorithm: 
+
+  - Correct identification Factory A: 90%   (False identification of B/C: 5% / 5%)
+  - Correct identification Factory B: 95% (False identification of A/C: 4% / 1%)
+  - Correct identification Factory C: 85% (False identification of A/B: 6% / 9%)
+  
+  
+When applying the algorithm to the shipped products, the test is positive for Factory A.
+Including the defect data from 2.1, compute the posterior probability that your shipment is from Company A. 
+
+```{r}
+#write code here
+```
+
+\newpage
+
+
+# Task Set 3
+
+
+For Task 3.1 and 3.2, suppose, one last time, you want to estimate the proportions of land on the earth’s surface.
+
+## Task 3.1
+
+Specify a prior distribution and store 10,000 random samples from it in a vector `sample`.
+Plot the prior distribution and briefly explain your choice of the prior.
+
+```{r}
+#write code here
+```
+
+## Task 3.2 
+
+Run the following code chunk that uses your object `sample` to obtain prior probabilities
+for the possible proportions of land 0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1 that
+approximate your prior distribution. 
+
+```{r eval=FALSE}
+prop <- seq(0, 1, length.out = 12)
+priors <- vector("numeric", length(prop))
+for (i in seq_along(prop)){
+priors[i] <- round( sum(sample >= prop[i] & sample < prop[i+1]) / 1e4 , 2)
+}
+poss <- tibble(prop_L = seq(0, 1, .1),
+prior = priors[1:11])
+```
+
+Use these priors to compute the posterior probability after observing 26 times land in 100 globe tosses.
+Take 1,000 samples from the posterior distribution and with each sample, predict the outcome of 100 globe tosses.
+Plot the posterior predictions in a histogram.
+
+```{r}
+#write code here
+```
