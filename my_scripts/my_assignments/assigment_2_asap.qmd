@@ -214,8 +214,8 @@ Specify a prior distribution and store 10,000 random samples from it in a vector
 Plot the prior distribution and briefly explain your choice of the prior.
 
 ```{r}
-a <- 28
-b <- 65
+a <- 7
+b <- 15
 
 theta <- seq(0,1, length.out = 1e3)
 d <- dbeta(theta, shape1 = a, shape2 = b)
@@ -235,6 +235,7 @@ ggplot(summary) +
   geom_density(data = sample, aes(x = smp), color = "green", size = 1) + 
   labs(x = expression(theta), 
        y = "Density")
+
 
 ```
 
@@ -259,6 +260,33 @@ Take 1,000 samples from the posterior distribution and with each sample, predict
 Plot the posterior predictions in a histogram.
 
 ```{r}
+lh <- dbinom(26, 100, prob = poss$prop_L)
+posterior <- poss$prior*lh
+posterior_norm <- posterior / sum(posterior)
+
+poss$likelihood <- lh
+poss$posterior <- posterior_norm
+poss[ , -(1:2)] <- round(poss[ , -(1:2)], 4)
+poss
+
+#Sample from posterior
+N <- 1e3
+post_sample <- sample(poss$prop_L, size=N, replace=T, prob=poss$posterior)
+post_sample <- data.frame(smp=post_sample)
+
+# Predict using the posterior
+preds <- data.frame(L =vector("numeric", N))
+
+for (i in seq_along(post_sample$smp)){ 
+  preds[i, "L"] <- rbinom(n = 1, size = N, prob = post_sample[i, "smp"])
+}
+
+preds %>% ggplot(aes(x=L)) + 
+  geom_histogram(fill = "green", color = "green", 
+                 alpha = .5, bins = 100) + 
+  scale_x_continuous(limits = c(0,N), breaks = seq(0,N,100)) + 
+  labs(x = "Number of Simulated L out of 1000",
+       y = "Frequency") 
 
 #write code here
 ```
