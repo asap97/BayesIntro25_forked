@@ -78,6 +78,7 @@ Timestamp: `r format(time, "%Y-%m-%d %H:%M:%S %Z")`
 ```{r}
 library(tidyverse)
 library(ggplot2)
+library(data.tree)
 ```
 
 
@@ -153,7 +154,7 @@ data <- data.frame(factory = c("A","B","C"), dr =c(.1, .15, .2), prior = c(.5,.2
 # Observation is that one defect occurred, so the belief is updated 
 data_1 <- updating(data, 1, 1)
 data_1
-# Either A, or B, or C has a defect in the next shipment?
+# Does A, or B, or C have a defect in the next shipment?  
 sum(data_1$dr*data_1$posterior)
 
 ```
@@ -174,7 +175,29 @@ When applying the algorithm to the shipped products, the test is positive for Fa
 Including the defect data from 2.1, compute the posterior probability that your shipment is from Company A. 
 
 ```{r}
-#write code here
+# By drawing a garden of forking data, and setting the prior probabilities as the posterior probabilities calculated in the last step
+tree <- Node$new("Sample")
+
+a <- tree$AddChild("A"); a$prob <- data_1[1,"posterior"]
+b <- tree$AddChild("B"); b$prob <- data_1[2,"posterior"]
+c <- tree$AddChild("C"); c$prob <- data_1[2,"posterior"]
+a1 <- a$AddChild("A"); a1$prob <- 0.9
+a2 <- a$AddChild("B"); a2$prob <- 0.05
+a3 <- a$AddChild("C"); a3$prob <- 0.05
+b1 <- b$AddChild("A"); b1$prob <- 0.04
+b2 <- b$AddChild("B"); b2$prob <- 0.95
+b3 <- b$AddChild("C"); b3$prob <- 0.01
+c1 <- c$AddChild("A"); c1$prob <- 0.06
+c2 <- c$AddChild("B"); c2$prob <- 0.09
+c3 <- c$AddChild("C"); c3$prob <- 0.85
+
+print(tree, "prob")
+
+# Since we include the defect, that is we have seen a defect and updated the beliefs, the prior is the posterior of the last point, and the likelihood is the probability that the ML algorithm gives A given that A is true (that if A really made the product the ML shows A), which is 0.9
+num <- data_1[1,"posterior"]*0.9
+den <- data_1[1,"posterior"]*0.9+data_1[2,"posterior"]*0.04+data_1[3,"posterior"]*0.06
+num/den
+
 ```
 
 \newpage
