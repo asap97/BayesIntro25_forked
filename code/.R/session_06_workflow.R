@@ -32,7 +32,7 @@ ggplot(NORM, aes(x = range, y = d)) +
 # beta
 
 range <- seq(0, 1, length.out = 100)
-d <- dbeta(range, shape1 =10, shape2 = 10)
+d <- dbeta(range, shape1 = 28, shape2 = 65)
 BETA <- data.frame(range, d)
 
 ggplot(BETA, aes(x = range, y = d)) +
