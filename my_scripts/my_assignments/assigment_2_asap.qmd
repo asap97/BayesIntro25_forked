@@ -1,7 +1,7 @@
 ---
 title: "Assignment 2"
 subtitle: "Introduction to Bayesian Data Analysis 2025"
-author: 'Student (#StudentID)'
+author: 'Ana Sofia Acevedo (03805441)'
 format: pdf
 editor_options: 
   chunk_output_type: console
@@ -53,7 +53,7 @@ collaboration <- FALSE # FALSE: Individual work; TRUE: Collaboration
 
 <!--Before handing in the assignment, check the box by adding an 'X" to the box -->
 
-- [ ] `r ifelse(collaboration==FALSE, individual, collab)`
+- [x] `r ifelse(collaboration==FALSE, individual, collab)`
 
 
 **3. System Information**
@@ -65,7 +65,7 @@ time <- Sys.time()
 ```
 
 
-- [ ] I confirm that I generated the submitted PDF report myself using `r info$R.version$version.string` and `Quarto`/`RMarkdown`. 
+- [x] I confirm that I generated the submitted PDF report myself using `r info$R.version$version.string` and `Quarto`/`RMarkdown`. 
 
 
 Machine stamp: `r info$platform`
@@ -76,7 +76,9 @@ Timestamp: `r format(time, "%Y-%m-%d %H:%M:%S %Z")`
 \newpage
   
 ```{r}
-#load packages here
+library(tidyverse)
+library(ggplot2)
+library(gtools)
 ```
 
 
@@ -92,7 +94,30 @@ Assume that Company A is three times more likely to obtain reviews than Company 
 Which company maximizes the likelihood of the 10 reviews and which company has the highest posterior probability that it was rated? 
 
 ```{r}
-#write code here
+#Assuming the satisfaction rate of 0.6 means that 60% of reviews are positive
+data <- data.frame(company = c("A","B","C"), sr =c(.6, .8, .83), prior = c(3/5,1/5,1/5))
+data
+
+# This function takes a data frame that has at least 3 columns, for the candidate (name and rate) and the prior, a number of trials N and a number of success s.
+updating <- function(data, N, s){
+  candidates <- data[, 2]
+  prior <- data[, 3]
+  
+  lh <- dbinom(s, N, prob = candidates)
+  posterior <- prior*lh
+  posterior_norm <- posterior / sum(posterior)
+  
+  data$likelihood <- lh
+  data$posterior <- posterior_norm
+  data[ , -(1:2)] <- round(data[ , -(1:2)], 4)
+  
+  return(data)
+}
+
+data <- updating(data, 10, 8)
+data
+
+
 ```
 
 ## Task 1.2
@@ -102,7 +127,15 @@ Show that the posterior probability that Company B received the reviews decrease
 To obtain the updated posterior probability, only compute the likelihood of the 10 most recent reviews. 
 
 ```{r}
-#write code here
+# Yesterday's posterior is today's prior
+data_1 <- data[,1:3]
+data_1$prior <- data$posterior
+data_1
+
+# Update 
+updating(data_1, 10, 3)
+
+
 ```
 
 \newpage
@@ -121,7 +154,12 @@ You receive a shipment from one of the factories, and upon inspection, you find 
 Compute the probability that the next shipment from this company will also contain defective products.
 
 ```{r}
-#write code here
+data <- data.frame(factory = c("A","B","C"), dr =c(.1, .15, .2), prior = c(.5,.25,.25))
+# Observation is that one defect occurred, so the belief is updated 
+data_1 <- updating(data, 1, 1)
+# Either A, or B, or C has a defect in the next shipment?
+sum(data_1$dr*data_1$posterior)
+
 ```
 
 
