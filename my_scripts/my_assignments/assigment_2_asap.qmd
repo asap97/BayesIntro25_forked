@@ -227,8 +227,8 @@ Where $P(A_{True})$ is the probability that it actually comes from A and $P(ML=A
 ```{r}
 # Since we include the defect, that is we have seen a defect and updated the 
 #beliefs, the prior is the posterior of the last point, and the likelihood is 
-# the probability that the ML algorithm gives A given that A is true (that if A
-# really made the product the ML shows A), which is 0.9
+# the probability that the ML algorithm gives A given that A is true (that if 
+# A really made the product the ML shows A), which is 0.9
 num <- 0.9*data_1[1,"posterior"]
 den <- data_1[1,"posterior"]*0.9+data_1[2,"posterior"]*0.04+data_1[3,"posterior"]*0.06
 num/den
@@ -250,20 +250,15 @@ Plot the prior distribution and briefly explain your choice of the prior.
 
 #### Answer
 
-I chose a beta distribution with a mean close to 0.3 because the "general knowledge" is the earth is 70% water, but I considered values lower than 0.3 were more likely because of the melting of ice caps which could increase the percentage of water that covers the surface. 
+I chose a beta distribution with a mean close to 0.3 because the "general knowledge" is the Earth's surface is covered 70% water, but I considered values lower than 0.3 were more likely because of the melting of ice caps which could increase the percentage of water that covers the surface. 
 
 ```{r}
 a <- 7
 b <- 15
 
-theta <- seq(0,1, length.out = 1e3)
+theta <- seq(0,1, length.out = 1e4)
 d <- dbeta(theta, shape1 = a, shape2 = b)
 summary <- data.frame(theta, d)
-
-ggplot(summary, aes(x = theta, y = d)) +
-  geom_line(linewidth = 1, linetype = "dashed", color = "#ff02ff" ) +
-  labs(x = expression(theta), 
-       y = "Density") 
 
 # sample from prior
 no <- 1e4
@@ -272,9 +267,9 @@ sample <- data.frame(smp = rbeta(no, a, b))
 ggplot(summary) +
   geom_line(size = 1, linetype = "dashed",  color = "#ff02ff", 
             aes(x = theta, y = d)) +
-  geom_density(data = sample, aes(x = smp), color = "green", size = 1) + 
+  geom_density(data = sample, aes(x = smp), color = "green", linewidth = 1) + 
   labs(x = expression(theta), 
-       y = "Density", title = "Prior distribution and sampling from it")
+       y = "Density", title = "Prior and sampling from it")
 
 
 ```
@@ -304,38 +299,34 @@ Plot the posterior predictions in a histogram.
 
 I also plotted some generated data with the prior just so see how it would compare with the data generated after updating with the new observations. 
 
-
-
 ```{r}
-# Plotting the data generated with the prior first
 # Sample from prior
 N <- 1e3
 sample <- sample(poss$prop_L, size=N, replace=T, prob=poss$prior)
 sample <- data.frame(smp=sample)
 
-# Predict using the posterior
+# Predict using the prior
 preds <- data.frame(L =vector("numeric", N))
 
 for (i in seq_along(sample$smp)){ 
-  preds[i, "L"] <- rbinom(n = 1, size = N, prob = sample[i, "smp"])
+  preds[i, "L"] <- rbinom(n = 1, size = 100, prob = sample[i, "smp"])
 }
 
 preds %>% ggplot(aes(x=L)) + 
   geom_histogram(fill = "green", color = "green", 
                  alpha = .5, bins = 100) + 
-  scale_x_continuous(limits = c(0,N), breaks = seq(0,N,100)) + 
-  labs(x = "Number of Simulated L out of 1000",
-       y = "Frequency", title = "Values obtained when sampling with the prior") 
+  scale_x_continuous(limits = c(0,100)) + 
+  labs(x = "# of Land observed",
+       y = "Frequency", title = "# of Times L is observed in 100 tosses for 
+       each sampled value of cp obtained using the prior") +
+  theme(plot.title = element_text(size=12))
 
 ```
 
-
-Now, updating with the new observations
+Now updating and using the posterior
 
 ```{r}
-
 # Updating with the new observations
-
 lh <- dbinom(26, 100, prob = poss$prop_L)
 posterior <- poss$prior*lh
 posterior_norm <- posterior / sum(posterior)
@@ -345,7 +336,7 @@ poss$posterior <- posterior_norm
 poss[ , -(1:2)] <- round(poss[ , -(1:2)], 4)
 poss
 
-#Sample from posterior
+# Sample from posterior
 N <- 1e3
 post_sample <- sample(poss$prop_L, size=N, replace=T, prob=poss$posterior)
 post_sample <- data.frame(smp=post_sample)
@@ -354,15 +345,18 @@ post_sample <- data.frame(smp=post_sample)
 preds <- data.frame(L =vector("numeric", N))
 
 for (i in seq_along(post_sample$smp)){ 
-  preds[i, "L"] <- rbinom(n = 1, size = N, prob = post_sample[i, "smp"])
+  preds[i, "L"] <- rbinom(n = 1, size = 100, prob = post_sample[i, "smp"])
 }
 
 preds %>% ggplot(aes(x=L)) + 
   geom_histogram(fill = "green", color = "green", 
                  alpha = .5, bins = 100) + 
-  scale_x_continuous(limits = c(0,N), breaks = seq(0,N,100)) + 
-  labs(x = "Number of Simulated L out of 1000",
-       y = "Frequency", title = "Values obtained when sampling with
-       the posterior") 
+  scale_x_continuous(limits = c(0,100)) + labs(x = "# of Land observed",
+  y = "Frequency", title = "# of Times L is observed in 100 tosses for each
+  sampled value of cp obtained using the posterior") +
+  theme(plot.title = element_text(size=12))
+
 
 ```
+
+
