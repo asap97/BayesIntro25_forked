@@ -265,7 +265,7 @@ no <- 1e4
 sample <- data.frame(smp = rbeta(no, a, b))
 
 ggplot(summary) +
-  geom_line(size = 1, linetype = "dashed",  color = "#ff02ff", 
+  geom_line(linewidth = 1, linetype = "dashed",  color = "#ff02ff", 
             aes(x = theta, y = d)) +
   geom_density(data = sample, aes(x = smp), color = "green", linewidth = 1) + 
   labs(x = expression(theta), 
