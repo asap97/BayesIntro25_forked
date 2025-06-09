@@ -2,7 +2,7 @@
 title: "Assignment 2"
 subtitle: "Introduction to Bayesian Data Analysis 2025"
 author: 'Ana Sofia Acevedo (03805441)'
-format: pdf
+format: pdf 
 editor_options: 
   chunk_output_type: console
 ---
@@ -97,9 +97,12 @@ Which company maximizes the likelihood of the 10 reviews and which company has t
 
 ```{r}
 #Assuming the satisfaction rate of 0.6 means that 60% of reviews are positive
-data <- data.frame(company = c("A","B","C"), sr =c(.6, .8, .83), prior = c(3/5,1/5,1/5))
+data <- data.frame(company = c("A","B","C"), sr =c(.6, .8, .83), 
+                   prior = c(3/5,1/5,1/5))
 
-# This function takes a data frame that has at least 3 columns, for the candidate (name first column and rate second column) and the prior (third column), a number of trials N and a number of success s.
+# This function takes a data frame that has at least 3 columns, for the 
+# candidate (name first column and rate second column) and the prior 
+# (third column), a number of trials N and a number of success s.
 updating <- function(data, N, s){
   candidates <- data[, 2]
   prior <- data[, 3]
@@ -129,7 +132,8 @@ To obtain the updated posterior probability, only compute the likelihood of the 
 
 #### Answer
 ```{r}
-# Yesterday's posterior is today's prior (this considers all the info from the 20 reviews), ansd computing the likelihood of ony the 10 most recent reviews
+# Yesterday's posterior is today's prior (this considers all the info from the 
+# 20 reviews), ansd computing the likelihood of ony the 10 most recent reviews
 data_1 <- data[,1:3]
 post_1 <- data$posterior
 data_1$prior <- data$posterior
@@ -163,11 +167,13 @@ Compute the probability that the next shipment from this company will also conta
 #### Answer
 
 ```{r}
-data <- data.frame(factory = c("A","B","C"), dr =c(.1, .15, .2), prior = c(.5,.25,.25))
+data <- data.frame(factory = c("A","B","C"), dr =c(.1, .15, .2), 
+                   prior = c(.5,.25,.25))
 # Observation is that one defect occurred, so the belief is updated 
 data_1 <- updating(data, 1, 1)
 data_1
-# Does A, or B, or C have a defect in the next shipment? Is calcualted as an expected value 
+# Does A, or B, or C have a defect in the next shipment? Is calculated as an 
+# expected value 
 sum(data_1$dr*data_1$posterior)
 
 ```
@@ -190,7 +196,8 @@ Including the defect data from 2.1, compute the posterior probability that your 
 #### Answer
 
 ```{r}
-# By drawing a garden of forking data, and setting the prior probabilities as the posterior probabilities calculated in the last step
+# By drawing a garden of forking data, and setting the prior probabilities as 
+# the posterior probabilities calculated in the last step
 tree <- Node$new("Sample")
 
 a <- tree$AddChild("A"); a$prob <- data_1[1,"posterior"]
@@ -218,7 +225,10 @@ $$
 Where $P(A_{True})$ is the probability that it actually comes from A and $P(ML=A)$ is that the machine learning algorithm predict it comes from factory A. Hence, 
 
 ```{r}
-# Since we include the defect, that is we have seen a defect and updated the beliefs, the prior is the posterior of the last point, and the likelihood is the probability that the ML algorithm gives A given that A is true (that if A really made the product the ML shows A), which is 0.9
+# Since we include the defect, that is we have seen a defect and updated the 
+#beliefs, the prior is the posterior of the last point, and the likelihood is 
+# the probability that the ML algorithm gives A given that A is true (that if A
+# really made the product the ML shows A), which is 0.9
 num <- 0.9*data_1[1,"posterior"]
 den <- data_1[1,"posterior"]*0.9+data_1[2,"posterior"]*0.04+data_1[3,"posterior"]*0.06
 num/den
@@ -260,7 +270,8 @@ no <- 1e4
 sample <- data.frame(smp = rbeta(no, a, b))
 
 ggplot(summary) +
-  geom_line(size = 1, linetype = "dashed",  color = "#ff02ff", aes(x = theta, y = d)) +
+  geom_line(size = 1, linetype = "dashed",  color = "#ff02ff", 
+            aes(x = theta, y = d)) +
   geom_density(data = sample, aes(x = smp), color = "green", size = 1) + 
   labs(x = expression(theta), 
        y = "Density", title = "Prior distribution and sampling from it")
@@ -351,6 +362,7 @@ preds %>% ggplot(aes(x=L)) +
                  alpha = .5, bins = 100) + 
   scale_x_continuous(limits = c(0,N), breaks = seq(0,N,100)) + 
   labs(x = "Number of Simulated L out of 1000",
-       y = "Frequency", title = "Values obtained when sampling with the posterior") 
+       y = "Frequency", title = "Values obtained when sampling with
+       the posterior") 
 
 ```
