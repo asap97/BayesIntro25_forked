@@ -1,3 +1,4 @@
+library(ggplot2)
 
 # priors  -----------------------------------------------------
 
@@ -6,7 +7,7 @@
 x_min <- -5
 x_max <- 5
 range <- seq(x_min, x_max, length.out = 100) # sample space
-range
+#range
 d <- dunif(range, min = x_min, max = x_max) # densities
 UNI <- data.frame(range, d)
 
