@@ -1,7 +1,7 @@
 # load packages
 library(tidyverse)
 library(rethinking)
-
+library(ggplot2)
 
 #distribution parameters
 N <- 1e3
@@ -28,6 +28,7 @@ hist(PTS)
 # by correctly updating the priors and if it makes sense
 m <- alist(
   #likelihood 
+  # this name of the variable has to be the same in the data set 
   pts ~ dnorm(mu, sigma),
   
   #priors
@@ -49,8 +50,63 @@ m_sim_fit
 m_sim_fit@formula
 m_sim_fit@start
 m_sim_fit@coef
-m_sim_fit@data
+#m_sim_fit@data
 
 
 #Now we go to the real data set and fit the model with the priors i specified
 shaq <- read_csv("data/shaq.csv")
+N_games <- nrow(shaq)
+real_pts <- data.frame(pts=shaq$PTS)
+
+m_real_fit <- quap(m, data=real_pts)
+
+m_real_fit
+m_real_fit@formula
+m_real_fit@start
+m_real_fit@coef
+#m_real_fit@data
+precis(m_real_fit)
+pairs(m_real_fit, pars = c("mu", "sigma"))
+
+post_pred <- extract.samples(m_real_fit, n=1e3)
+head(post_pred)
+#hist(rnorm(n=1000, post_pred$mu, post_pred$sigma))
+#hist(real_pts$pts)
+
+# Plotting it better and agaisnt a simulated with the posterior
+N_games <- 1e3
+mu <- m_real_fit@coef[1]
+sd <- m_real_fit@coef[2]
+#sim_pts_prior <- sim_pts
+sim_pts <- data.frame( pts = round(rnorm(N_games, mu, sd), 0) )
+
+# Label the data
+sim_pts_labeled   <- sim_pts       %>% mutate(source = "Posterior")
+#prior_pts_labeled <- sim_pts_prior %>% mutate(source = "Prior")
+real_pts_labeled  <- real_pts      %>% mutate(source = "Real")
+
+all_pts <- bind_rows(sim_pts_labeled, real_pts_labeled)
+#all_pts <- bind_rows(sim_pts_labeled, prior_pts_labeled, real_pts_labeled)
+
+# Plot
+ggplot(all_pts, aes(x = pts, fill = source)) +
+  geom_histogram(position = "identity", alpha = 0.5, bins = 30, color = "black") +
+  scale_fill_manual(values = c(
+    "Posterior" = "#C71585", 
+    #"Prior"     = "#FFA500", 
+    "Real"      = "#87CEEB"
+    
+  )) +
+  labs(x = "Points", y = "Count", fill = "Data Source") +
+  theme_minimal()
+
+
+
+#-----------------------INCLUDING PREDICTORS------------------
+# When including a predictor, you condition the prediction. For example, you 
+# can include field goal attempts as x_i. Beta*FGA needs to have points as 
+# its unit, so beta is how many points you can get for a field goal attempt. 
+# You can get between 0 and 3 points in basketball --> Q: you need to know
+# something about the values a predictor can take 
+
+
