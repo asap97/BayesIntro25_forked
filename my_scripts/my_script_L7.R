@@ -14,6 +14,7 @@ hist(replicate(N, sum(rgamma(N, a, b))))
 hist(replicate(N, sum(runif(N, a, b))))
 
 
+
 # Priors for the motel PTS_i ~ N(mu, sigma)
 # For the mean of points scored in a game a normal distribution with mean 30
 # and sd of 5, for the sd of points per game gamma bc it shouldnt take 
