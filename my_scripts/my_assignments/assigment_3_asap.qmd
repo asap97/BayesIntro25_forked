@@ -255,7 +255,12 @@ Compute the squared errors for the simple regression model and the multiple regr
 Which model makes better predictions for the test data? 
 
 ```{r}
-# write code here
+error <- function(pred, real){
+  sum((pred - real)^2)
+}
+
+error(m_1_pred$PTS, shaq_test$PTS)
+error(m_2_pred$PTS, shaq_test$PTS)
 ```
 
 
@@ -265,5 +270,20 @@ For both models, compute the (non-squared) differences between each prediction a
 Create a plot that shows the distributions of differences for both models. 
 
 ```{r}
-# write code here
+dif <- data.frame(
+  dif_m1 = m_1_pred$PTS - shaq_test$PTS,
+  dif_m2 = m_2_pred$PTS - shaq_test$PTS
+)
+
+ggplot() + 
+  geom_histogram(data = dif, aes(x = dif_m1, fill = "Model 1"), 
+                 alpha = 0.5, color = "#87CEEB", bins = 30) +
+  geom_histogram(data = dif, aes(x = dif_m2, fill = "Model 2"), 
+                 alpha = 0.5, color = "#FDB927", bins = 30) +
+  scale_fill_manual(values = c("Model 1" = "#87CEEB", "Model 2" = "#FDB927")) +
+  labs(x = "Differences (Predicted - Actual)", 
+       y = "Frequency",
+       fill = "Model") +
+  theme_minimal()
+
 ```
