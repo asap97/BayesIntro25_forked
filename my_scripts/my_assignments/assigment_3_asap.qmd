@@ -1,0 +1,175 @@
+---
+title: "Assignment 3"
+subtitle: "Introduction to Bayesian Data Analysis 2025"
+author: 'Student (#StudentID)'
+format: pdf
+editor_options: 
+  chunk_output_type: console
+---
+
+<!--Preamble-->
+
+## Preamble 
+
+  - **Points**: Assignment 3 comprises of 6 tasks, 2 points each (12 in total). 2 points are obtained for complete and correct answers. 1 point is obtained for a proper approach or if only part of the task is solved.
+  
+  - **Submission**: Hand in the assignment as a PDF `Markdown` report. The report should show the results, the code that produced the results, and additional text or comment. The report should appear clean and be uploaded on Moodle until Wednesday, June 25, 9:45 am.
+  
+  - **Collaboration**: Reports can be handed in as team work (max. 2 people). When working in teams, declare this on page 2. However, each collaborator needs to hand in a report via Moodle, stating their name, student number (p. 1), and their machine specification (p. 2).  
+  
+  - **Permitted and Prohibited**: You may use materials from this class (e.g., slides, code on GitHub) as well as online forums such as [Stack Overflow](https://Stackoverflow.com/questions) to write your code. However, you are not allowed to post questions from the assignment online or prompt them (including paraphrases) to LLMs/chatbots. All use of LLMs/chatbots is generally not allowed. Solutions may not be shared with other students from the class (except 1 potential collaborator).
+  
+  
+\newpage
+
+
+## Authorship Information
+
+
+```{r}
+#| include: false
+individual <- 'I certify that this assignment represents my own work. I have not used any unauthorized or unacknowledged aids as stated in the preamble, including free or commercial systems or services offered on the internet or text generating systems embedded into software. I did not copy code from someone else nor did I share my code with someone else.' 
+
+collab <- 'I certify that this assignment represents collaborative work by me and my collaborator listed below. I confirm that both contributed equally to this assignment and that we are equally responsible for the entirety of this report that we will receive the same grade on this report. I have not used any unauthorized or unacknowledged aids as stated in the preamble, including free or commercial systems or services offered on the internet or text generating systems embedded into software. I did not copy code nor did I share my code with someone other than my collaborator. I also found no indication for any such misconduct by collaborator.'
+```
+
+
+**1. Declaration of Collaboration**
+
+<!--If you collaborated, set collaboration <- TRUE --> 
+
+```{r}
+#| include: false
+collaboration <- FALSE # FALSE: Individual work; TRUE: Collaboration
+```
+
+<!--If you collaborated, check the 'Yes' box and enter the collaborator name--> 
+
+- [ ] Yes (Collaborator name) 
+- [x] No
+
+
+**2. Declaration of Authorship**
+
+<!--Before handing in the assignment, check the box by adding an 'X" to the box -->
+
+- [ ] `r ifelse(collaboration==FALSE, individual, collab)`
+
+
+**3. System Information**
+
+```{r}
+#| include: false
+info <-sessionInfo()
+time <- Sys.time()
+```
+
+
+- [ ] I confirm that I generated the submitted PDF report myself using `r info$R.version$version.string` and `Quarto`/`RMarkdown`. 
+
+
+Machine stamp: `r info$platform`
+
+Timestamp: `r format(time, "%Y-%m-%d %H:%M:%S %Z")`
+
+\newpage
+
+```{r}
+# load packages here
+```
+  
+Load the data set `shaq` to solve the tasks below.
+If the `Markdown` document and the data set are stored in different folders (e.g., "BayesIntro/assignments/assignment_3.md" and "BayesIntro/data/shaq.csv" you can use the [package `here`](https://cran.r-project.org/web/packages/here/vignettes/rmarkdown.html) to load the data. 
+
+```{r}
+# load data here
+```
+
+# Task Set 1
+
+For Tasks 1.1 and 1.2, create a training data set `shaq_training` that contains all the data from the `Season` 1 to 5. 
+
+```{r}
+# write code here
+```
+
+
+## Task 1.1
+
+Use the training data and estimate a simple regression model where you predict points (PTS) from field goal attempts (FGA). 
+Specify the regression model such that the intercept represents the expected number of points, given an average number of FGA.
+Provide a table that summarizes the posterior distribution. 
+
+```{r}
+# write code here
+```
+
+
+## Task 1.2 
+
+Estimate a multiple regression model, where you add free throw attempts (FTA) as a second predictor. 
+Again, the intercept should represent the expected number of points, given an average number of FGA and FTA.
+Provide a table that summarizes the posterior distribution.
+
+```{r}
+# write code here
+```
+
+
+
+# Task Set 2
+
+We know want to look how well the trained models from task set 1 predict out of sample. 
+For the following tasks 2.1 and 2.2, create a test data set `shaq_test` that contains all the data from the `Season` 6 to 10. 
+
+```{r}
+# write code here
+```
+
+# Task 2.1 
+
+Use posterior samples from the simple regression model that you estimated in Task 1.1 to predict the points in the Games from `Season` 6 to 10, using the FGA data from the games in these seasons. 
+Create a plot that shows the predicted point distribution along the actual point distribution from Season `Season` 6 to 10. 
+
+```{r}
+# write code here
+```
+
+
+# Task 2.2 
+
+Use posterior samples from the multiple regression model that you estimated in Task 1.2 to predict the points in the Games from `Season` 6 to 10, using the FGA and FTA data from the games in these seasons. 
+Create a plot that shows the predicted point distribution along the actual point distribution from Season `Season` 6 to 10. 
+
+```{r}
+# write code here
+```
+
+\newpage
+
+# Task Set 3
+
+## Task 3.1 
+
+Write a function `error()` that takes the predicted points $\hat{y}$ and the observed points $y$ to compute the sum of squared errors:
+
+$$
+\sum_i^n(\hat{y}_i - y_i)^2
+$$
+
+Compute the squared errors for the simple regression model and the multiple regression model. 
+Which model makes better predictions for the test data? 
+
+```{r}
+# write code here
+```
+
+
+## Task 3.2
+
+For both models, compute the (non-squared) differences between each prediction and observation. 
+Create a plot that shows the distributions of differences for both models. 
+
+```{r}
+# write code here
+```
