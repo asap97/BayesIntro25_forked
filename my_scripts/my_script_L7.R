@@ -15,12 +15,12 @@ hist(replicate(N, sum(runif(N, a, b))))
 
 
 
-# Priors for the motel PTS_i ~ N(mu, sigma)
+# Priors for the model PTS_i ~ N(mu, sigma)
 # For the mean of points scored in a game a normal distribution with mean 30
 # and sd of 5, for the sd of points per game gamma bc it shouldnt take 
 # negative values
 hist(rnorm(N, mean = 30, sd = 5))
-hist(rgamma(N, 2, 1))
+hist(rgamma(N, 2, 0.08))
 PTS <- rnorm(N, rnorm(N, mean = 30, sd = 5), rgamma(N, 2, 1))
 hist(PTS)
 
@@ -74,7 +74,7 @@ head(post_pred)
 #hist(rnorm(n=1000, post_pred$mu, post_pred$sigma))
 #hist(real_pts$pts)
 
-# Plotting it better and agaisnt a simulated with the posterior
+# Plotting it better and against a simulated with the posterior
 N_games <- 1e3
 mu <- m_real_fit@coef[1]
 sd <- m_real_fit@coef[2]
@@ -105,9 +105,9 @@ ggplot(all_pts, aes(x = pts, fill = source)) +
 
 #-----------------------INCLUDING PREDICTORS------------------
 # When including a predictor, you condition the prediction. For example, you 
-# can include field goal attempts as x_i. Beta*FGA needs to have points as 
+# can include field goal attempts FGA as x_i. Beta*FGA needs to have points as 
 # its unit, so beta is how many points you can get for a field goal attempt. 
-# You can get between 0 and 3 points in basketball --> Q: you need to know
+# You can get between 0 and 3 points in basketball --> You should to know
 # something about the values a predictor can take 
 
 

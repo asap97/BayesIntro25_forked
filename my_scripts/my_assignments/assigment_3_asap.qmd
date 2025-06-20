@@ -1,7 +1,7 @@
 ---
 title: "Assignment 3"
 subtitle: "Introduction to Bayesian Data Analysis 2025"
-author: 'Student (#StudentID)'
+author: 'Ana Sofia Acevedo (03805441)'
 format: pdf
 editor_options: 
   chunk_output_type: console
@@ -53,7 +53,7 @@ collaboration <- FALSE # FALSE: Individual work; TRUE: Collaboration
 
 <!--Before handing in the assignment, check the box by adding an 'X" to the box -->
 
-- [ ] `r ifelse(collaboration==FALSE, individual, collab)`
+- [x] `r ifelse(collaboration==FALSE, individual, collab)`
 
 
 **3. System Information**
@@ -75,14 +75,17 @@ Timestamp: `r format(time, "%Y-%m-%d %H:%M:%S %Z")`
 \newpage
 
 ```{r}
-# load packages here
+library(here)
+library(tidyverse)
+library(rethinking)
+library(ggplot2)
 ```
   
 Load the data set `shaq` to solve the tasks below.
 If the `Markdown` document and the data set are stored in different folders (e.g., "BayesIntro/assignments/assignment_3.md" and "BayesIntro/data/shaq.csv" you can use the [package `here`](https://cran.r-project.org/web/packages/here/vignettes/rmarkdown.html) to load the data. 
 
 ```{r}
-# load data here
+shaq <- read.csv(here("data", "shaq.csv"))
 ```
 
 # Task Set 1
@@ -90,7 +93,7 @@ If the `Markdown` document and the data set are stored in different folders (e.g
 For Tasks 1.1 and 1.2, create a training data set `shaq_training` that contains all the data from the `Season` 1 to 5. 
 
 ```{r}
-# write code here
+shaq_training <- shaq[shaq$Season %in% c(1:5), ]
 ```
 
 
@@ -100,8 +103,36 @@ Use the training data and estimate a simple regression model where you predict p
 Specify the regression model such that the intercept represents the expected number of points, given an average number of FGA.
 Provide a table that summarizes the posterior distribution. 
 
+#### Answer
+
+In this case, the model would be something like 
+
+$$
+PTS_{i} \sim N(\mu_{i},\sigma) \\
+\mu_{i} = \alpha + \beta * (FGA_{i}-\overline{FGA})
+$$
+For this, the priors that need to be set correspond to $\alpha$, $\beta$, and $\sigma$. 
+
 ```{r}
-# write code here
+#Calculate the mean of FGA for mean centering 
+FGA_bar <-round(mean(shaq_training$FGA),0)
+
+# Establish model with priors
+m_1 <- alist(
+    
+    PTS ~ dnorm(mu, sigma), # likelihood
+    mu <- a + b * (FGA-FGA_bar),
+    
+    # priors
+    a ~ dgamma(2,0.08),
+    b ~ dunif(0,3), 
+    sigma ~ dunif(0,10) 
+  
+  )
+
+m_1_fit <- quap( m_1 , data=shaq_training )
+precis(m_1_fit)
+
 ```
 
 
@@ -111,8 +142,37 @@ Estimate a multiple regression model, where you add free throw attempts (FTA) as
 Again, the intercept should represent the expected number of points, given an average number of FGA and FTA.
 Provide a table that summarizes the posterior distribution.
 
+#### Answer
+
+In this case, the model can be modified to 
+$$
+PTS_{i} \sim N(\mu_{i},\sigma) \\
+\mu_{i} = \alpha + \beta_{1} * (FGA_{i}-\overline{FGA})+\beta_{2}*(FTA_{i}-\overline{FTA})
+$$
+
 ```{r}
-# write code here
+#Calculate the mean of FTA for mean centering 
+FTA_bar <-round(mean(shaq_training$FTA),0)
+
+# Establish model with priors
+m_2 <- alist(
+    
+    PTS ~ dnorm(mu, sigma), # likelihood
+    mu <- a + b_1 * (FGA-FGA_bar) + b_2 * (FTA-FTA_bar),
+    
+    # priors
+    a ~ dgamma(2,0.08),
+    b_1 ~ dunif(0,3), 
+    b_2 ~ dunif(0,3),
+    sigma ~ dunif(0,10) 
+  
+  )
+
+m_2_fit <- quap( m_2 , data=shaq_training )
+precis(m_2_fit)
+
+pairs(m_2_fit, pars = c("a", "b_1", "b_2", "sigma"))
+
 ```
 
 
@@ -123,7 +183,7 @@ We know want to look how well the trained models from task set 1 predict out of 
 For the following tasks 2.1 and 2.2, create a test data set `shaq_test` that contains all the data from the `Season` 6 to 10. 
 
 ```{r}
-# write code here
+shaq_test <- shaq[shaq$Season %in% c(6:10), ]
 ```
 
 # Task 2.1 
@@ -132,7 +192,25 @@ Use posterior samples from the simple regression model that you estimated in Tas
 Create a plot that shows the predicted point distribution along the actual point distribution from Season `Season` 6 to 10. 
 
 ```{r}
-# write code here
+#Draw posterior samples from the first model (a, b, sigma)
+post_pred_1 <- extract.samples(m_1_fit, n=nrow(shaq_test))
+#Get FGA from the test data
+data <- data.frame(post_pred_1, FGA=shaq_test$FGA)
+#Predict using posterior samples and FGA from test set
+m_1_pred <- data %>% mutate(PTS = a + b*(FGA-FGA_bar) + rnorm(nrow(shaq_test),0,sigma))
+
+m_1_pred  %>% ggplot(aes(x = PTS)) + 
+  geom_histogram(data = shaq_test, aes(x = PTS, fill = "Real"), 
+                 alpha = 0.5, color = "#C71585", bins = 30) +
+  geom_histogram(aes(fill = "Posterior"), 
+                 alpha = 0.5, color = "#87CEEB", bins = 30) +
+  scale_fill_manual(values = c("Real" = "#C71585", "Posterior" = "#87CEEB")) +
+  labs(x = "PTS", 
+       y = "Frequency",
+       fill = "Data") +
+  theme_minimal()
+
+
 ```
 
 
@@ -142,7 +220,23 @@ Use posterior samples from the multiple regression model that you estimated in T
 Create a plot that shows the predicted point distribution along the actual point distribution from Season `Season` 6 to 10. 
 
 ```{r}
-# write code here
+#Draw posterior samples from the second model (a, b_1, b_2, sigma)
+post_pred_2 <- extract.samples(m_2_fit, n=nrow(shaq_test))
+#Get FGA from the test data
+data <- data.frame(post_pred_2, FGA=shaq_test$FGA, FTA=shaq_test$FTA)
+#Predict using posterior samples and FGA from test set
+m_2_pred <- data %>% mutate(PTS = a + b_1 * (FGA-FGA_bar) + b_2 * (FTA-FTA_bar) + rnorm(nrow(shaq_test),0,sigma))
+
+m_2_pred  %>% ggplot(aes(x = PTS)) + 
+  geom_histogram(data = shaq_test, aes(x = PTS, fill = "Real"), 
+                 alpha = 0.5, color = "#C71585", bins = 30) +
+  geom_histogram(aes(fill = "Posterior"), 
+                 alpha = 0.5, color = "#FDB927", bins = 30) +
+  scale_fill_manual(values = c("Real" = "#C71585", "Posterior" = "#FDB927")) +
+  labs(x = "PTS", 
+       y = "Frequency",
+       fill = "Data") +
+  theme_minimal()
 ```
 
 \newpage
