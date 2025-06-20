@@ -65,7 +65,7 @@ time <- Sys.time()
 ```
 
 
-- [ ] I confirm that I generated the submitted PDF report myself using `r info$R.version$version.string` and `Quarto`/`RMarkdown`. 
+- [x] I confirm that I generated the submitted PDF report myself using `r info$R.version$version.string` and `Quarto`/`RMarkdown`. 
 
 
 Machine stamp: `r info$platform`
@@ -78,7 +78,7 @@ Timestamp: `r format(time, "%Y-%m-%d %H:%M:%S %Z")`
 library(here)
 library(tidyverse)
 library(rethinking)
-library(ggplot2)
+library(ggplot2) 
 ```
   
 Load the data set `shaq` to solve the tasks below.
@@ -171,8 +171,6 @@ m_2 <- alist(
 m_2_fit <- quap( m_2 , data=shaq_training )
 precis(m_2_fit)
 
-pairs(m_2_fit, pars = c("a", "b_1", "b_2", "sigma"))
-
 ```
 
 
@@ -191,13 +189,16 @@ shaq_test <- shaq[shaq$Season %in% c(6:10), ]
 Use posterior samples from the simple regression model that you estimated in Task 1.1 to predict the points in the Games from `Season` 6 to 10, using the FGA data from the games in these seasons. 
 Create a plot that shows the predicted point distribution along the actual point distribution from Season `Season` 6 to 10. 
 
+#### Answer
+
 ```{r}
 #Draw posterior samples from the first model (a, b, sigma)
 post_pred_1 <- extract.samples(m_1_fit, n=nrow(shaq_test))
 #Get FGA from the test data
 data <- data.frame(post_pred_1, FGA=shaq_test$FGA)
 #Predict using posterior samples and FGA from test set
-m_1_pred <- data %>% mutate(PTS = a + b*(FGA-FGA_bar) + rnorm(nrow(shaq_test),0,sigma))
+m_1_pred <- data %>% mutate(PTS = a + b*(FGA-FGA_bar) 
+                            + rnorm(nrow(shaq_test),0,sigma))
 
 m_1_pred  %>% ggplot(aes(x = PTS)) + 
   geom_histogram(data = shaq_test, aes(x = PTS, fill = "Real"), 
@@ -219,13 +220,16 @@ m_1_pred  %>% ggplot(aes(x = PTS)) +
 Use posterior samples from the multiple regression model that you estimated in Task 1.2 to predict the points in the Games from `Season` 6 to 10, using the FGA and FTA data from the games in these seasons. 
 Create a plot that shows the predicted point distribution along the actual point distribution from Season `Season` 6 to 10. 
 
+#### Answer
+
 ```{r}
 #Draw posterior samples from the second model (a, b_1, b_2, sigma)
 post_pred_2 <- extract.samples(m_2_fit, n=nrow(shaq_test))
 #Get FGA from the test data
 data <- data.frame(post_pred_2, FGA=shaq_test$FGA, FTA=shaq_test$FTA)
 #Predict using posterior samples and FGA from test set
-m_2_pred <- data %>% mutate(PTS = a + b_1 * (FGA-FGA_bar) + b_2 * (FTA-FTA_bar) + rnorm(nrow(shaq_test),0,sigma))
+m_2_pred <- data %>% mutate(PTS = a + b_1 * (FGA-FGA_bar) + b_2 * (FTA-FTA_bar)
+                            + rnorm(nrow(shaq_test),0,sigma))
 
 m_2_pred  %>% ggplot(aes(x = PTS)) + 
   geom_histogram(data = shaq_test, aes(x = PTS, fill = "Real"), 
@@ -254,6 +258,8 @@ $$
 Compute the squared errors for the simple regression model and the multiple regression model. 
 Which model makes better predictions for the test data? 
 
+#### Answer
+
 ```{r}
 error <- function(pred, real){
   sum((pred - real)^2)
@@ -269,6 +275,8 @@ error(m_2_pred$PTS, shaq_test$PTS)
 For both models, compute the (non-squared) differences between each prediction and observation. 
 Create a plot that shows the distributions of differences for both models. 
 
+#### Answer
+
 ```{r}
 dif <- data.frame(
   dif_m1 = m_1_pred$PTS - shaq_test$PTS,
@@ -281,7 +289,7 @@ ggplot() +
   geom_histogram(data = dif, aes(x = dif_m2, fill = "Model 2"), 
                  alpha = 0.5, color = "#FDB927", bins = 30) +
   scale_fill_manual(values = c("Model 1" = "#87CEEB", "Model 2" = "#FDB927")) +
-  labs(x = "Differences (Predicted - Actual)", 
+  labs(x = "Differences", 
        y = "Frequency",
        fill = "Model") +
   theme_minimal()
