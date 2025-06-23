@@ -269,6 +269,7 @@ error(m_1_pred$PTS, shaq_test$PTS)
 error(m_2_pred$PTS, shaq_test$PTS)
 ```
 
+Model 2 makes better predictions since the error is smaller.
 
 ## Task 3.2
 
