@@ -34,3 +34,51 @@ barplot(t(as.matrix(islands[, c("popu", "visits")])),
         main = "Comparison of Population vs Visits per Island",
         xlab = "Island",
         ylab = "Count")
+
+
+#-----------------------Using ulam() for MCMC------------------------
+
+
+library(rethinking)
+library(parallel)
+library(here)
+
+shaq <- read.csv(here("data", "shaq.csv"))
+dat <- list( 
+  N = nrow(shaq) , 
+  pts = shaq$PTS ,
+  min = shaq$Minutes ,
+  fga = shaq$FGA , 
+  fta = shaq$FTA , 
+  min_bar = round(mean(shaq$Minutes), 2) , 
+  fga_bar = round(mean(shaq$FGA), 2) ,
+  fta_bar = round(mean(shaq$FTA), 2)
+)
+
+
+# use ulam (interfacec to Stans HMC Sampler)
+cores <- detectCores(logical = TRUE)
+n_chains <- 3
+
+mshaq <- ulam(
+  alist(
+    
+    # likelihood
+    pts ~ dnorm(mu, sigma), 
+    mu <- a + b_1 * (min - min_bar) + b_2 * (fga - fga_bar) * 2 + b_3 * (fta - fta_bar),
+    
+    # prior
+    a ~ dnorm(20, 8),
+    b_1 ~ dnorm(0, 2), 
+    b_2 ~ dunif(0, 2), 
+    b_3 ~ dunif(0, 1), 
+    sigma ~ dunif(0,10)
+  ),
+  data = dat, 
+  chains = n_chains , # number of independent MCMC chains 
+  cores = n_chains , # number of cores that 
+  iter = 500)
+
+precis(mshaq)
+rethinking::traceplot(mshaq)
+
