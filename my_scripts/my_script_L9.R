@@ -77,8 +77,9 @@ mshaq <- ulam(
   data = dat, 
   chains = n_chains , # number of independent MCMC chains 
   cores = n_chains , # number of cores that 
-  iter = 500)
+  iter = 300)
 
 precis(mshaq)
 rethinking::traceplot(mshaq)
+stancode(mshaq)
 
