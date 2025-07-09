@@ -102,8 +102,29 @@ traceplot(m2)
 
 
 
+# estimate total effect of G CONSIDERING D, using the AGGREGATED data
+m3 <- ulam(
+  alist(
+    # likelihood
+    A ~ dbinom(N, p) , 
+    logit(p) <- a[G, D]  , 
+    
+    # priors
+    matrix[G, D]:a ~ dnorm(0,1) 
+  ) , 
+  data=dat_wide, 
+  chains = 4, 
+  cores = 4, 
+  file = "my_scripts/my_models/session_10_m3" # loads model fit file when previously fitted and stored
+)
+precis(m3, depth = 3)
+inv_logit(coef(m3))
+traceplot(m3)
+
+
 #FOR THE ASSIGNMENT
 #logit(p) = a[G,D]
 #logit(p) = a[D]+b[D]G
+#dep <- paste0("D", 1:6)
 
 
