@@ -1,0 +1,223 @@
+---
+title: "Assignment 4"
+subtitle: "Introduction to Bayesian Data Analysis 2025"
+author: 'Student (#StudentID)'
+format: pdf
+editor_options: 
+  chunk_output_type: console
+---
+
+<!--Preamble-->
+
+## Preamble 
+
+  - **Points**: Assignment 4 comprises of 5 tasks, 2 points for Tasks 1.1-2.2 each and 4 points for Task 3 (12 in total). Full points are obtained for complete and correct answers---a proportion of the points are obtained for a proper approach or if only part of the task is solved.
+  
+  - **Submission**: Hand in the assignment as a PDF `Markdown` report. The report should show the results, the code that produced the results, and additional text or comment. The report should appear clean and be uploaded on Moodle until Wednesday, July 7, 9:45 am.
+  
+  - **Collaboration**: Reports can be handed in as team work (max. 2 people). When working in teams, declare this on page 2. However, each collaborator needs to hand in a report via Moodle, stating their name, student number (p. 1), and their machine specification (p. 2).  
+  
+  - **Permitted and Prohibited**: You may use materials from this class (e.g., slides, code on GitHub) as well as online forums such as [Stack Overflow](https://Stackoverflow.com/questions) to write your code. However, you are not allowed to post questions from the assignment online or prompt them (including paraphrases) to LLMs/chatbots. All use of LLMs/chatbots is generally not allowed. Solutions may not be shared with other students from the class (except 1 potential collaborator).
+  
+  
+\newpage
+
+## `ulam` and `Quarto`
+
+Running MCMC with `ulam()` takes some time and produces many messages. 
+This can be be annoying when you repeatedly render the `Quarto` document and the goal is to have a clean report. 
+Here are two tips to avoid an ugly document and refitting the model every time you re-render the document. 
+
+1) Write the ulam() model in a separate code chunk with the `echo`, `eval`, `output` settings as below to avoid printing the MCMC progress messages of `ulam()` in the PDF document.
+
+2) Use the `file` argument in `ulam()` to fit the model only once and store the fitting results for reuse. In the code below, `ulam()` first looks into the folder `assignment_4` for a file `m1.rds`--the model fit object `m1`. If the file exists, it loads this file without fitting the model again. If the file does not exist yet, `ulam()` fits the model and stores the fitted object in the respective folder, so it can be reused later. 
+
+```
+#| echo: true
+#| eval: true
+#| output: false
+
+
+m1 <- ulam(
+  model , 
+  data= ... , 
+  chains = ... , 
+  cores = ... , 
+  file = here("assignment_4", "m1")
+)
+
+```
+
+\newpage
+
+## Authorship Information
+
+
+```{r}
+#| include: false
+individual <- 'I certify that this assignment represents my own work. I have not used any unauthorized or unacknowledged aids as stated in the preamble, including free or commercial systems or services offered on the internet or text generating systems embedded into software. I did not copy code from someone else nor did I share my code with someone else.' 
+
+collab <- 'I certify that this assignment represents collaborative work by me and my collaborator listed below. I confirm that both contributed equally to this assignment and that we are equally responsible for the entirety of this report that we will receive the same grade on this report. I have not used any unauthorized or unacknowledged aids as stated in the preamble, including free or commercial systems or services offered on the internet or text generating systems embedded into software. I did not copy code nor did I share my code with someone other than my collaborator. I also found no indication for any such misconduct by collaborator.'
+```
+
+
+**1. Declaration of Collaboration**
+
+<!--If you collaborated, set collaboration <- TRUE --> 
+
+```{r}
+#| include: false
+collaboration <- FALSE # FALSE: Individual work; TRUE: Collaboration
+```
+
+<!--If you collaborated, check the 'Yes' box and enter the collaborator name--> 
+
+- [ ] Yes (Collaborator name) 
+- [x] No
+
+
+**2. Declaration of Authorship**
+
+<!--Before handing in the assignment, check the box by adding an 'X" to the box -->
+
+- [ ] `r ifelse(collaboration==FALSE, individual, collab)`
+
+
+**3. System Information**
+
+```{r}
+#| include: false
+info <-sessionInfo()
+time <- Sys.time()
+```
+
+
+- [ ] I confirm that I generated the submitted PDF report myself using `r info$R.version$version.string` and `Quarto`/`RMarkdown`. 
+
+
+Machine stamp: `r info$platform`
+
+Timestamp: `r format(time, "%Y-%m-%d %H:%M:%S %Z")`
+
+\newpage
+
+```{r}
+#load packages here
+```
+
+
+# Task Set 1
+
+For Tasks 1.1 and 1.2, consider the data generating processes for two groups of people below. 
+Each of the `i=1,...,N` (`N=500`) persons belongs to either `Group 1` or `Group 2` and either succeeded in a task (`outcome=1`) or not (`outcome=0`).
+
+```{r}
+N <- 500 # number of people
+group <- rbinom(N, 1, prob=.5) # determine group membership
+outcome <- rbinom(N, 1, prob=ifelse(group==0, .2, .5)) # determine outcome
+sim <- data.frame(person=1:N, group, outcome)
+```
+
+
+## Task 1.1
+
+Model the outcome data with a Bernoulli likelihood using an *indicator* variable for group membership. 
+Plot the posterior distribution of the *probability of success* for each group separately. 
+
+```{r}
+#| echo: true
+#| eval: true
+#| output: false
+
+# fit model here
+```
+
+
+```{r}
+# analyse the results here
+```
+
+
+## Task 1.2 
+
+Model the outcome data with a Binomial likelihood using an *index* variable for group membership. 
+Plot the posterior distribution of the *differences in the probability of success* between the two groups---i.e., the 95% percentile interval should exclude 0 if there is a credible difference. 
+
+```{r}
+#| echo: true
+#| eval: true
+#| output: false
+
+# fit model here
+```
+
+
+```{r}
+# analyse the results here
+```
+
+\newpage
+
+# Task Set 2 
+
+Load the data set `heart.csv` to solve the Task Set 2. 
+
+```{r}
+# load data set here
+```
+
+
+## Task 2.1
+
+Run a Bayesian logistic regression model to estimate the risk of men and women with and without diabetes to develop a coronary heart disease (TenYearCHD). 
+Does diabetes increase the risk for men or women? 
+
+```{r}
+#| echo: true
+#| eval: true
+#| output: false
+
+# fit model here
+```
+
+```{r}
+# analyse the results here
+```
+
+
+## Task 2.2
+
+Run a Bayesian logistic regression model to estimate the effect of age on the risk of developing a coronary heart disease (TenYearCHD), separately for women and men. 
+Ensure that the regression intercept represents the risk of women and men with average age.
+Does age increase the risk for men or women? 
+
+```{r}
+#| echo: true
+#| eval: true
+#| output: false
+
+# fit model here
+```
+
+```{r}
+# analyse the results here
+```
+
+\newpage
+
+# Task 3
+
+Assume that data is randomly generated from a normal distribution according to:
+
+$$y_i \sim  N(\mu=100,\sigma=10)  \: .$$
+
+Simulate $N=500$ data points from this distribution. 
+Write a MCMC (Metropolis) algorithm that fits a normal distribution to the simulated data and recovers the mean and standard deviation. 
+Use 2000 iterations and discard the first 1,000 as warm-up.
+Plot the posterior distribution and the MCMC chain for both parameters.
+
+```{r}
+# write code here
+```
+
+
