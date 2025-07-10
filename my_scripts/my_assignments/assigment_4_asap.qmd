@@ -236,11 +236,14 @@ posterior <-  tibble(p1 = plogis(m1_index.post$a[,1]) ,
                      p2 = plogis(m1_index.post$a[,2]) , 
                      diff = p1 - p2)
 
+ci <- quantile(posterior$diff, probs=c(0.025, 0.975))
 
 ggplot(posterior, aes(diff)) + 
-  geom_density(linewidth = 1) +
-  labs(x="Probability G1 - Probability G2" , 
-       y="Density") +
+  geom_density(linewidth = 1, color = "#9575CD") +
+  geom_vline(xintercept = ci, linetype = "dashed", color = "grey40") +
+  labs(x = "Probability G1 - Probability G2", 
+       y = "Density",
+       title = "Difference in probabilities with 95% Interval") +
   theme_minimal()
 
 ```
