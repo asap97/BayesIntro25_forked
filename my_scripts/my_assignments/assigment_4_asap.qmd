@@ -453,8 +453,6 @@ inv_logit(coef(m2_gender_indicator)[1])
 inv_logit(coef(m2_gender_indicator)[2])
 
 
-# The plots of differences are made using the results obtained by the index approach 
-
 ```
 
 \newpage
@@ -470,8 +468,91 @@ Write a MCMC (Metropolis) algorithm that fits a normal distribution to the simul
 Use 2000 iterations and discard the first 1,000 as warm-up.
 Plot the posterior distribution and the MCMC chain for both parameters.
 
+#### Answer
+
+Taking the analogy we did in class, the "islands" would be the parameter values, the "population sizes" are the (posterior) probabilities at each parameter value, an the "days" are samples taken from the joint posterior of the parameters in the model, in this case I guess the iterations.
+
+Given that we are interested in maximizing the posterior probability, going back to Bayes Theorem, the posterior is proportional to the multiplication of the likelihood and the prior.
+
+Then, the posterior $\propto$ likelihood * prior. Or, more detailed, 
+
+$$p(\theta|Data) \propto p(Data|\theta)*p(\theta) $$
+
+Moreover, by assuming a normal distribution and taking the parameters as independent, then the joint prior will end up being the multiplication, and the previous expression for the posterior can be rewritten as 
+
+$$p(Data|\mu,\sigma)*p(\mu)*p(\sigma) $$
+The likelihood function can be calculated according to the probability density function of an assumed distribution, in this case normal. Since the observations are taken to be independent, the likelihood will be the product of the density function for all observed data points. 
+
 ```{r}
-# write code here
+#simulated data
+simu <- rnorm(500, mean=100, sd=10)
+
+# likelihood function supposing the data comes from a normal distribution with unknown parameters, since the draws are independent, then the joint likelihood is the product of the individual results when evaluation the probability density function. Since the numbers are too small, working with logarithms is better because the multiplication turns into an addition.
+likelihood = function(data, mu, sigma) {
+  sum(dnorm(data, mu, sigma, log = TRUE))
+}
+
+# Then some priors for both parameters are set for both unknown parameters. They mean is assumed to be normally distributed, and the standard deviation also but it is shifted a lot to the right to avoid it taking negative values as much as possible
+# mu ~ N(90, 5)
+# sd ~ N(15, 0.5)
+mu_curr <- 90#rnorm(1, 90, 5)
+sigma_curr <- 7#rnorm(1, 12, 2)
+
+
+# Running the algorithm
+iter <- 5000
+param <- data.frame(mu = rep(0,iter), sigma = rep(0,iter), 
+                    posterior = rep(0,iter))
+
+for (i in c(1:iter)){
+  # recording the parameters 
+  param[i,"mu"] = mu_curr
+  param[i,"sigma"] = sigma_curr
+  
+  # calculating posterior distribution of the current values of parameters
+  likelihood_current <- likelihood(simu, mu_curr, sigma_curr)
+  prior_mu_current <- dnorm(mu_curr, mean = 90, sd = 5, log = TRUE)
+  prior_sigma_current <- dnorm(sigma_curr, mean = 12, sd = 2, log = TRUE)
+  post_current <- likelihood_current + prior_mu_current + prior_sigma_current
+  param[i,"posterior"] <- post_current
+  
+  # generate new proposal based on the proposed distribution 
+  mu_new <- rnorm(1, mu_curr, 5)
+  sigma_new <- rnorm(1, sigma_curr, 1)
+  
+  # calculating posterior with the new proposal
+  likelihood_new <- likelihood(simu, mu_new, sigma_new)
+  prior_mu_new <- dnorm(mu_new, mean = 90, sd = 5, log = TRUE)  
+  prior_sigma_new <- dnorm(sigma_new, mean = 12, sd = 1, log = TRUE)
+  post_new <- likelihood_new + prior_mu_new + prior_sigma_new
+  
+  # calculate the ratio to check if the new one is "visited" or not, since it is based on the log scale, the ratio is calculated by subtraction. To turn it into a comparable ratio with the algorithm it is reversed using "exp"
+  ratio <- exp(post_new-post_current)
+  if(ratio>runif(1)){
+    mu_curr <- mu_new
+    sigma_curr <- sigma_new
+  }
+  
+}
+
+# Trace plots considering all iterations to show where the chain started and where it converged 
+
+
+
+# Ignore the first 1000 as warm-up period for plotting the posterior
+post_param <- tail(param, 1000)
+
+# plot of the posterior probability for mu 
+
+
+plot(param$posterior)
+plot(param$mu)
+plot(param$sigma)
+
 ```
 
+To do this task, I used the following resources:
+
+[Rampinelli, 2019](https://www.rpubs.com/cassiorampinelli/479727)
+[Eisenberg, 2017](https://epimath.org/epid-814-materials/Labs/MetropolisSampler/MetropolisSampler.html)
 
