@@ -1,7 +1,7 @@
 ---
 title: "Assignment 4"
 subtitle: "Introduction to Bayesian Data Analysis 2025"
-author: 'Student (#StudentID)'
+author: 'Ana Sofia Acevedo (03805441)'
 format: pdf
 editor_options: 
   chunk_output_type: console
