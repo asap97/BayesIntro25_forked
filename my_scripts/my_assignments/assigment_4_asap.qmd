@@ -80,7 +80,7 @@ collaboration <- FALSE # FALSE: Individual work; TRUE: Collaboration
 
 <!--Before handing in the assignment, check the box by adding an 'X" to the box -->
 
-- [ ] `r ifelse(collaboration==FALSE, individual, collab)`
+- [x] `r ifelse(collaboration==FALSE, individual, collab)`
 
 
 **3. System Information**
@@ -92,7 +92,7 @@ time <- Sys.time()
 ```
 
 
-- [ ] I confirm that I generated the submitted PDF report myself using `r info$R.version$version.string` and `Quarto`/`RMarkdown`. 
+- [x] I confirm that I generated the submitted PDF report myself using `r info$R.version$version.string` and `Quarto`/`RMarkdown`. 
 
 
 Machine stamp: `r info$platform`
@@ -102,7 +102,10 @@ Timestamp: `r format(time, "%Y-%m-%d %H:%M:%S %Z")`
 \newpage
 
 ```{r}
-#load packages here
+library(rethinking)
+library(tidyverse)
+library(here)
+library(ggplot2)
 ```
 
 
@@ -124,17 +127,60 @@ sim <- data.frame(person=1:N, group, outcome)
 Model the outcome data with a Bernoulli likelihood using an *indicator* variable for group membership. 
 Plot the posterior distribution of the *probability of success* for each group separately. 
 
+#### Answer
+
+To use a Bernoulli likelihood, we work with the data for each individual. 
+
 ```{r}
 #| echo: true
 #| eval: true
 #| output: false
 
-# fit model here
+m1_indicator <- ulam(
+  alist(
+    # likelihood
+    outcome ~ dbern(p) , 
+    logit(p) <- a + b*group  , 
+    
+    # priors
+    a ~ dnorm(0,1.5) , 
+    b ~ dnorm(0,1.5)
+    
+  ) , 
+  data=sim, 
+  chains = 4, 
+  cores = 4, 
+  file = "my_scripts/my_models/assignment4_m1_indicator" 
+)
 ```
 
 
 ```{r}
-# analyse the results here
+# Results analysis
+precis(m1_indicator, depth = 2)
+#alpha (mean probability for group 1)
+inv_logit(coef(m1_indicator)[1])
+#alpha+beta (mean probability for group 2)
+inv_logit(sum(coef(m1_indicator)))
+
+samp_m1_indicator <- extract.samples(m1_indicator) 
+m1_indicator.post <- data.frame(
+  post_g1 = inv_logit(samp_m1_indicator$a),
+  post_g2 = inv_logit(samp_m1_indicator$a + samp_m1_indicator$b)
+)
+
+
+ggplot() + 
+  geom_histogram(data = m1_indicator.post, aes(x = post_g1, fill = "Group 1"), 
+                 alpha = 0.5, color = "#9575CD", bins = 60) +
+  geom_histogram(data = m1_indicator.post, aes(x = post_g2, fill = "Group 2"), 
+                 alpha = 0.5, color = "#4DD0E1", bins = 60) +
+  scale_fill_manual(values = c("Group 1" = "#9575CD", "Group 2" = "#4DD0E1")) +
+  labs(x = "Probability of Success", 
+       y = "Frequency",
+       fill = "Group", title = "Posterior distributions") +
+  theme_minimal()
+
 ```
 
 
@@ -143,17 +189,50 @@ Plot the posterior distribution of the *probability of success* for each group s
 Model the outcome data with a Binomial likelihood using an *index* variable for group membership. 
 Plot the posterior distribution of the *differences in the probability of success* between the two groups---i.e., the 95% percentile interval should exclude 0 if there is a credible difference. 
 
+#### Answer
+
+To use a Binomial likelihood, we work with the aggregated data, where the number of trials 'N' is included.
+
+```{r}
+sim_wide <- list(
+  group = 1:2,
+  outcome = as.integer(tapply(sim$outcome, sim$group, sum)),
+  total = as.integer(tapply(sim$outcome, sim$group, length))
+)
+view(sim_wide)
+```
+
+
 ```{r}
 #| echo: true
 #| eval: true
 #| output: false
 
-# fit model here
+m1_index <- ulam(
+  alist(
+    # likelihood
+    outcome ~ dbinom(total, p) , 
+    logit(p) <- a[group]  , 
+    
+    # priors
+    a[group] ~ dnorm(0,5)
+    
+  ) , 
+  data=sim_wide, 
+  chains = 4, 
+  cores = 4, 
+  file = "my_scripts/my_models/assignment4_m1_index" 
+)
 ```
 
 
 ```{r}
-# analyse the results here
+# Result analysis
+precis(m1_index, depth = 2)
+inv_logit(coef(m1_index))
+
+
+
 ```
 
 \newpage
@@ -163,7 +242,7 @@ Plot the posterior distribution of the *differences in the probability of succes
 Load the data set `heart.csv` to solve the Task Set 2. 
 
 ```{r}
-# load data set here
+heart <- read.csv(here("my_scripts/my_assignments", "heart.csv"))
 ```
 
 
@@ -171,6 +250,10 @@ Load the data set `heart.csv` to solve the Task Set 2.
 
 Run a Bayesian logistic regression model to estimate the risk of men and women with and without diabetes to develop a coronary heart disease (TenYearCHD). 
 Does diabetes increase the risk for men or women? 
+
+#### Answer
+
+The dependent variable is coronary heart disease, and the independent variables are diabetes and gender. 
 
 ```{r}
 #| echo: true
@@ -190,6 +273,10 @@ Does diabetes increase the risk for men or women?
 Run a Bayesian logistic regression model to estimate the effect of age on the risk of developing a coronary heart disease (TenYearCHD), separately for women and men. 
 Ensure that the regression intercept represents the risk of women and men with average age.
 Does age increase the risk for men or women? 
+
+#### Answer
+
+The dependent variable is coronary heart disease, and the independent variables are age and gender. The model has to be centered around the age. 
 
 ```{r}
 #| echo: true
