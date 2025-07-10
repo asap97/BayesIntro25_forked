@@ -231,7 +231,17 @@ m1_index <- ulam(
 precis(m1_index, depth = 2)
 inv_logit(coef(m1_index))
 
+m1_index.post <- extract.samples(m1_index)
+posterior <-  tibble(p1 = plogis(m1_index.post$a[,1]) , 
+                     p2 = plogis(m1_index.post$a[,2]) , 
+                     diff = p1 - p2)
 
+
+ggplot(posterior, aes(diff)) + 
+  geom_density(linewidth = 1) +
+  labs(x="Probability G1 - Probability G2" , 
+       y="Density") +
+  theme_minimal()
 
 ```
 
