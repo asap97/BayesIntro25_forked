@@ -140,7 +140,7 @@ m1_indicator <- ulam(
   alist(
     # likelihood
     outcome ~ dbern(p) , 
-    logit(p) <- a + b*group  , 
+    logit(p) <- a + b*group , 
     
     # priors
     a ~ dnorm(0,1.5) , 
@@ -215,7 +215,7 @@ m1_index <- ulam(
     logit(p) <- a[group]  , 
     
     # priors
-    a[group] ~ dnorm(0,5)
+    a[group] ~ dnorm(0,2)
     
   ) , 
   data=sim_wide, 
@@ -285,7 +285,7 @@ m2_diabetes <- ulam(
   alist(
     # likelihood
     CHD ~ dbern(p) , 
-    logit(p) <- a[D, G]  , 
+    logit(p) <- a[D, G], 
     
     # priors
     matrix[D,G]:a ~ dnorm(0,1) 
@@ -300,7 +300,7 @@ m2_diabetes <- ulam(
 
 ```{r}
 # analyse the results here
-
+#precis(m2_diabetes, depth=3)
 df <- data.frame(case = c("D,M", "ND,M", "D,W",
                           "ND,W"), 
                  prob = inv_logit(coef(m2_diabetes)))
@@ -382,18 +382,79 @@ Does age increase the risk for men or women?
 
 #### Answer
 
-The dependent variable is coronary heart disease, and the independent variables are age and gender. The model has to be centered around the age. 
+The dependent variable is coronary heart disease, and the independent variables are age and gender. The model has to be centered around the age variable. I tried using both indicator and index, considering that for both of these the gender variable has to be labeled differently for the package to work.
+
+```{r}
+dat_heart$A_c <- dat_heart$A - mean(dat_heart$A)
+```
+
 
 ```{r}
 #| echo: true
 #| eval: true
 #| output: false
 
-# fit model here
+m2_gender_index <- ulam(
+  alist(
+    # likelihood
+    CHD ~ dbern(p), 
+    logit(p) <- a[G]+b_1*(A_c), 
+    
+    # priors
+    a[G] ~ dnorm(0,1),
+    b_1 ~ dnorm(0,1)
+    
+  ) , 
+  data=dat_heart, 
+  chains = 4, 
+  cores = 4, 
+  file = "my_scripts/my_models/assignment4_m2_gender_index" 
+)
+
+
+# Changing the labels of the gender variable to be able to implement it as an indicator, gender is 1 if it is a man, 0 if woman, so women is the base group
+dat_heart$G <- ifelse(dat_heart$G==1,1,0)
+
+m2_gender_indicator <- ulam(
+  alist(
+    # likelihood
+    CHD ~ dbern(p) , 
+    logit(p) <- a+b_1*(A_c)+b_2*G, 
+    
+    # priors
+    a ~ dnorm(0,1),
+    b_1 ~ dnorm(0,1),
+    b_2 ~ dnorm(0,1)
+    
+  ) , 
+  data=dat_heart, 
+  chains = 4, 
+  cores = 4, 
+  file = "my_scripts/my_models/assignment4_m2_gender_indicator" 
+)
 ```
 
 ```{r}
 # analyse the results here
+# Using the index approach
+traceplot(m2_gender_index)
+precis(m2_gender_index, depth = 3)
+#a[1] is the intercept for men, a[2] the intercept for women, and b_1 age coefficient
+inv_logit(coef(m2_gender_index))
+
+# Using the indicator approach
+traceplot(m2_gender_indicator)
+precis(m2_gender_indicator, depth = 3)
+# intercept for men 
+inv_logit(coef(m2_gender_indicator)[1]+coef(m2_gender_indicator)[3])
+# intercept for women
+inv_logit(coef(m2_gender_indicator)[1])
+# age coefficient
+inv_logit(coef(m2_gender_indicator)[2])
+
+
+# The plots of differences are made using the results obtained by the index approach 
+
 ```
 
 \newpage
