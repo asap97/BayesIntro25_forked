@@ -232,15 +232,15 @@ precis(m1_index, depth = 2)
 inv_logit(coef(m1_index))
 
 m1_index.post <- extract.samples(m1_index)
-posterior <-  tibble(p1 = plogis(m1_index.post$a[,1]) , 
+m1_index.post <-  tibble(p1 = plogis(m1_index.post$a[,1]) , 
                      p2 = plogis(m1_index.post$a[,2]) , 
                      diff = p1 - p2)
 
-ci <- quantile(posterior$diff, probs=c(0.025, 0.975))
+ci <- quantile(m1_index.post$diff, probs=c(0.025, 0.975))
 
-ggplot(posterior, aes(diff)) + 
+ggplot(m1_index.post, aes(diff)) + 
   geom_density(linewidth = 1, color = "#9575CD") +
-  geom_vline(xintercept = ci, linetype = "dashed", color = "grey40") +
+  geom_vline(xintercept = ci, linetype = "dashed", color = "#616161") +
   labs(x = "Probability G1 - Probability G2", 
        y = "Density",
        title = "Difference in probabilities with 95% Interval") +
@@ -256,6 +256,14 @@ Load the data set `heart.csv` to solve the Task Set 2.
 
 ```{r}
 heart <- read.csv(here("my_scripts/my_assignments", "heart.csv"))
+dat_heart <- data.frame(
+  CHD = heart$TenYearCHD,
+  # man is 1, woman is 2
+  G = ifelse(heart$male==1, 1, 2),
+  # 1 the person has diabetes, 2 they dont have
+  D = ifelse(heart$diabetes==1, 1, 2),
+  A = heart$age
+)
 ```
 
 
@@ -273,11 +281,96 @@ The dependent variable is coronary heart disease, and the independent variables 
 #| eval: true
 #| output: false
 
-# fit model here
+m2_diabetes <- ulam(
+  alist(
+    # likelihood
+    CHD ~ dbern(p) , 
+    logit(p) <- a[D, G]  , 
+    
+    # priors
+    matrix[D,G]:a ~ dnorm(0,1) 
+  ) , 
+  data=dat_heart, 
+  chains = 4, 
+  cores = 4, 
+  file = "my_scripts/my_models/assignment4_m2_diabetes" 
+)
+
 ```
 
 ```{r}
 # analyse the results here
+
+df <- data.frame(case = c("D,M", "ND,M", "D,W",
+                          "ND,W"), 
+                 prob = inv_logit(coef(m2_diabetes)))
+
+df
+
+#Extracting samples to then calculate the differences and check if there is a 
+#differential risk
+m2_diabetes.post <- extract.samples(m2_diabetes)
+
+# For MEN
+m2_diabetes_men.post <-  tibble(p1 = plogis(m2_diabetes.post$a[,1,1]) , 
+                     p2 = plogis(m2_diabetes.post$a[,2,1]) , 
+                     diff = p1 - p2)
+ci_men <- quantile(m2_diabetes_men.post$diff, probs=c(0.025, 0.975))
+
+ggplot() + 
+  geom_histogram(data = m2_diabetes_men.post, aes(x = p1, fill = "With diabetes"), 
+                 alpha = 0.5, color = "#FFA726", bins = 60) +
+  geom_histogram(data = m2_diabetes_men.post, aes(x = p2, fill = "Without diabetes"), 
+                 alpha = 0.5, color = "#FF8A65", bins = 60) +
+  scale_fill_manual(values = c("With diabetes" = "#FFA726", "Without diabetes" = "#FF8A65")) +
+  labs(
+    x = "Probability", 
+    y = "Frequency",
+    fill = "Case", 
+    title = "Posterior of CHD Probability for MEN"
+  ) +
+  theme_minimal()
+
+
+ggplot(m2_diabetes_men.post, aes(diff)) + 
+  geom_density(linewidth = 1, color = "#EF6C00") +
+  geom_vline(xintercept = ci_men, linetype = "dashed", color = "#616161") +
+  labs(x = "Probability with diabetes - Probability without diabetes", 
+       y = "Density",
+       title = "Difference in probabilities for MEN with 95% Interval") +
+  theme_minimal()
+
+
+# For WOMEN
+m2_diabetes_women.post <-  tibble(p1 = plogis(m2_diabetes.post$a[,1,2]) , 
+                     p2 = plogis(m2_diabetes.post$a[,2,2]) , 
+                     diff = p1 - p2)
+ci_women <- quantile(m2_diabetes_women.post$diff, probs=c(0.025, 0.975))
+
+ggplot() + 
+  geom_histogram(data = m2_diabetes_women.post, aes(x = p1, fill = "With diabetes"), 
+                 alpha = 0.5, color = "#4FC3F7", bins = 60) +
+  geom_histogram(data = m2_diabetes_women.post, aes(x = p2, fill = "Without diabetes"), 
+                 alpha = 0.5, color = "#4DB6AC", bins = 60) +
+  scale_fill_manual(values = c("With diabetes" = "#4FC3F7", "Without diabetes" = "#4DB6AC")) +
+  labs(
+    x = "Probability", 
+    y = "Frequency",
+    fill = "Case", 
+    title = "Posterior of CHD Probability for WOMEN"
+  ) +
+  theme_minimal()
+
+ggplot(m2_diabetes_women.post, aes(diff)) + 
+  geom_density(linewidth = 1, color = "#00ACC1") +
+  geom_vline(xintercept = ci_women, linetype = "dashed", color = "#616161") +
+  labs(x = "Probability with diabetes - Probability without diabetes", 
+       y = "Density",
+       title = "Difference in probabilities for WOMEN with 95% Interval") +
+  theme_minimal()
+
+
+
 ```
 
 
