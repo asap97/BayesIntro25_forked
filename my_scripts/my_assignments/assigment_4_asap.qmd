@@ -379,7 +379,7 @@ ggplot(m2_diabetes_women.post, aes(diff)) +
 
 ```
 
-Given that both intervals exclude 0, there is a credible difference in the risk of developing CHD given a preexisting condition of diabetes for both men and women. Specifically, diabetes increases the risk, since the difference of probabilities is positive in both cases.  
+Given that both intervals exclude 0, there is a credible difference in the risk of developing CHD given a preexisting condition of diabetes for both men and women. Specifically, diabetes increases the risk, since the difference of probabilities is positive in both cases. For women, having diabetes increases the risk by around 20% and for men by around 25%.
 
 ## Task 2.2
 
@@ -391,7 +391,7 @@ Does age increase the risk for men or women?
 
 The dependent variable is coronary heart disease, and the independent variables are age and gender. The model has to be centered around the age variable. I tried using both indicator and index, considering that for both of these the gender variable has to be labeled differently for the package to work.
 
-I also centered the data before, instead of calculating the average and using it inside the ulam() funciton, because I was getting an error when trying to do that. 
+I also centered the data before, instead of calculating the average and using it inside the ulam() funciton, because I was getting an error when trying to do that. The age is averaged with respect to all the individuals in the sample. 
 
 ```{r}
 dat_heart$A_c <- dat_heart$A - mean(dat_heart$A)
@@ -466,7 +466,7 @@ inv_logit(coef(m2_gender_indicator)[2])
 
 ```
 
-Given the positive value of the coefficient for the variable, age does increase the risk for  men and women. For each year above the average age, the risk increases by 50% for both genders. 
+Given the positive value of the coefficient for the variable, age does increase the risk for  men and women. For each year above the average age, the risk increases by around 51% for both genders. 
 
 \newpage
 
@@ -495,6 +495,13 @@ Moreover, by assuming a normal distribution and taking the parameters as indepen
 
 $$p(Data|\mu,\sigma)*p(\mu)*p(\sigma) $$
 The likelihood function can be calculated according to the probability density function of an assumed distribution, in this case normal. Since the observations are taken to be independent, the likelihood will be the product of the density function for all observed data points. 
+
+To do this task, I used the following resources:
+
+[Rampinelli, 2019](https://www.rpubs.com/cassiorampinelli/479727)
+
+[Eisenberg, 2017](https://epimath.org/epid-814-materials/Labs/MetropolisSampler/MetropolisSampler.html)
+
 
 ```{r}
 #simulated data
@@ -589,9 +596,4 @@ ggplot(param, aes(x = 1:iter, y = sigma)) +
 
 ```
 
-To do this task, I used the following resources:
-
-[Rampinelli, 2019](https://www.rpubs.com/cassiorampinelli/479727)
-
-[Eisenberg, 2017](https://epimath.org/epid-814-materials/Labs/MetropolisSampler/MetropolisSampler.html)
 
