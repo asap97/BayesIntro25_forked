@@ -150,7 +150,7 @@ m1_indicator <- ulam(
   data=sim, 
   chains = 4, 
   cores = 4, 
-  #file = "my_scripts/my_models/assignment4_m1_indicator" 
+  file = here("my_scripts/my_models", "assignment4_m1_indicator")
 )
 ```
 
@@ -215,13 +215,13 @@ m1_index <- ulam(
     logit(p) <- a[group]  , 
     
     # priors
-    a[group] ~ dnorm(0,2)
+    a[group] ~ dnorm(0,1.5)
     
   ) , 
   data=sim_wide, 
   chains = 4, 
   cores = 4, 
-  #file = "my_scripts/my_models/assignment4_m1_index" 
+  file = here("my_scripts/my_models", "assignment4_m1_index")
 )
 ```
 
@@ -293,7 +293,7 @@ m2_diabetes <- ulam(
   data=dat_heart, 
   chains = 4, 
   cores = 4, 
-  #file = "my_scripts/my_models/assignment4_m2_diabetes" 
+  file = here("my_scripts/my_models", "assignment4_m2_diabetes") 
 )
 
 ```
@@ -379,6 +379,7 @@ ggplot(m2_diabetes_women.post, aes(diff)) +
 
 ```
 
+Given that both intervals exclude 0, there is a credible difference in the risk of developing CHD given a preexisting condition of diabetes for both men and women. Specifically, diabetes increases the risk, since the difference of probabilities is positive in both cases.  
 
 ## Task 2.2
 
@@ -389,6 +390,8 @@ Does age increase the risk for men or women?
 #### Answer
 
 The dependent variable is coronary heart disease, and the independent variables are age and gender. The model has to be centered around the age variable. I tried using both indicator and index, considering that for both of these the gender variable has to be labeled differently for the package to work.
+
+I also centered the data before, instead of calculating the average and using it inside the ulam() funciton, because I was getting an error when trying to do that. 
 
 ```{r}
 dat_heart$A_c <- dat_heart$A - mean(dat_heart$A)
@@ -414,7 +417,7 @@ m2_gender_index <- ulam(
   data=dat_heart, 
   chains = 4, 
   cores = 4, 
-  #file = "my_scripts/my_models/assignment4_m2_gender_index" 
+  file = here("my_scripts/my_models", "assignment4_m2_gender_index")
 )
 
 
@@ -438,21 +441,21 @@ m2_gender_indicator <- ulam(
   data=dat_heart, 
   chains = 4, 
   cores = 4, 
-  #file = "my_scripts/my_models/assignment4_m2_gender_indicator" 
+  file = here("my_scripts/my_models", "assignment4_m2_gender_indicator") 
 )
 ```
 
 ```{r}
 # analyse the results here
 # Using the index approach
-traceplot(m2_gender_index)
+# traceplot(m2_gender_index)
 precis(m2_gender_index, depth = 3)
 #a[1] is the intercept for men, a[2] the intercept for women, 
 # and b_1 age coefficient
 inv_logit(coef(m2_gender_index))
 
 # Using the indicator approach
-traceplot(m2_gender_indicator)
+# traceplot(m2_gender_indicator)
 precis(m2_gender_indicator, depth = 3)
 # intercept for men 
 inv_logit(coef(m2_gender_indicator)[1]+coef(m2_gender_indicator)[3])
@@ -461,8 +464,9 @@ inv_logit(coef(m2_gender_indicator)[1])
 # age coefficient
 inv_logit(coef(m2_gender_indicator)[2])
 
-
 ```
+
+Given the positive value of the coefficient for the variable, age does increase the risk for  men and women. For each year above the average age, the risk increases by 50% for both genders. 
 
 \newpage
 
@@ -512,11 +516,11 @@ likelihood = function(data, mu, sigma) {
 # mu ~ N(90, 5)
 # sd ~ N(15, 0.5)
 mu_curr <- 90#rnorm(1, 90, 5)
-sigma_curr <- 7#rnorm(1, 12, 2)
+sigma_curr <- 12#rnorm(1, 12, 2)
 
 
 # Running the algorithm
-iter <- 5000
+iter <- 2000
 param <- data.frame(mu = rep(0,iter), sigma = rep(0,iter), 
                     posterior = rep(0,iter))
 
@@ -539,7 +543,7 @@ for (i in c(1:iter)){
   # calculating posterior with the new proposal
   likelihood_new <- likelihood(simu, mu_new, sigma_new)
   prior_mu_new <- dnorm(mu_new, mean = 90, sd = 5, log = TRUE)  
-  prior_sigma_new <- dnorm(sigma_new, mean = 12, sd = 1, log = TRUE)
+  prior_sigma_new <- dnorm(sigma_new, mean = 12, sd = 2, log = TRUE)
   post_new <- likelihood_new + prior_mu_new + prior_sigma_new
   
   # calculate the ratio to check if the new one is "visited" or not, since it 
@@ -553,20 +557,35 @@ for (i in c(1:iter)){
   
 }
 
-# Trace plots considering all iterations to show where the chain started and 
-# where it converged 
-
-
 
 # Ignore the first 1000 as warm-up period for plotting the posterior
 post_param <- tail(param, 1000)
 
 # plot of the posterior probability for mu 
+ggplot(post_param, aes(x = mu)) +
+  geom_histogram(bins = 70, fill = "#AED581", color = "#7CB342") +
+  labs(title = "Posterior distribution of mu", x = "mu") +
+  theme_minimal()
+# Trace plot considering all iterations to show where the chain started and 
+# where it converged 
+ggplot(param, aes(x = 1:iter, y = mu)) +
+  geom_line(color = "#7CB342") +
+  labs(title = "MCMC for mu", x = "Iteration", y = "mu") +
+  theme_minimal()
 
 
-plot(param$posterior)
-plot(param$mu)
-plot(param$sigma)
+# plot of the posterior for sigma
+ggplot(post_param, aes(x = sigma)) +
+  geom_histogram(bins = 70, fill = "#FFB74D", color = "#F57C00") +
+  labs(title = "Posterior distribution of sigma", x = "sigma") +
+  theme_minimal()
+# Trace plot considering all iterations to show where the chain started and 
+# where it converged
+ggplot(param, aes(x = 1:iter, y = sigma)) +
+  geom_line(color = "#F57C00") +
+  labs(title = "MCMC for sigma", x = "Iteration", y = "sigma") +
+  theme_minimal()
+
 
 ```
 
