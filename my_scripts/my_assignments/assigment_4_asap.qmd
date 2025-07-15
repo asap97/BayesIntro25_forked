@@ -150,7 +150,7 @@ m1_indicator <- ulam(
   data=sim, 
   chains = 4, 
   cores = 4, 
-  file = here("my_scripts/my_models", "assignment4_m1_indicator")
+  #file = here("my_scripts/my_models", "assignment4_m1_indicator")
 )
 ```
 
@@ -163,7 +163,8 @@ inv_logit(coef(m1_indicator)[1])
 #alpha+beta (mean probability for group 2)
 inv_logit(sum(coef(m1_indicator)))
 
-samp_m1_indicator <- extract.samples(m1_indicator) 
+samp_m1_indicator <- extract.samples(m1_indicator)
+
 m1_indicator.post <- data.frame(
   post_g1 = inv_logit(samp_m1_indicator$a),
   post_g2 = inv_logit(samp_m1_indicator$a + samp_m1_indicator$b)
@@ -221,7 +222,7 @@ m1_index <- ulam(
   data=sim_wide, 
   chains = 4, 
   cores = 4, 
-  file = here("my_scripts/my_models", "assignment4_m1_index")
+  #file = here("my_scripts/my_models", "assignment4_m1_index")
 )
 ```
 
@@ -243,7 +244,7 @@ ggplot(m1_index.post, aes(diff)) +
   geom_vline(xintercept = ci, linetype = "dashed", color = "#616161") +
   labs(x = "Probability G1 - Probability G2", 
        y = "Density",
-       title = "Difference in probabilities with 95% Interval") +
+       title = "Distribution of difference in probabilities of success with 95% interval") +
   theme_minimal()
 
 ```
@@ -293,7 +294,7 @@ m2_diabetes <- ulam(
   data=dat_heart, 
   chains = 4, 
   cores = 4, 
-  file = here("my_scripts/my_models", "assignment4_m2_diabetes") 
+  #file = here("my_scripts/my_models", "assignment4_m2_diabetes") 
 )
 
 ```
@@ -389,12 +390,11 @@ Does age increase the risk for men or women?
 
 #### Answer
 
-The dependent variable is coronary heart disease, and the independent variables are age and gender. The model has to be centered around the age variable. I tried using both indicator and index, considering that for both of these the gender variable has to be labeled differently for the package to work.
-
-I also centered the data before, instead of calculating the average and using it inside the ulam() funciton, because I was getting an error when trying to do that. The age is averaged with respect to all the individuals in the sample. 
+The dependent variable is coronary heart disease, and the independent variables are age and gender. The model has to be centered around the age variable. 
 
 ```{r}
-dat_heart$A_c <- dat_heart$A - mean(dat_heart$A)
+# Center the data
+dat_heart$A_bar <- mean(dat_heart$A)
 ```
 
 
@@ -403,70 +403,43 @@ dat_heart$A_c <- dat_heart$A - mean(dat_heart$A)
 #| eval: true
 #| output: false
 
-m2_gender_index <- ulam(
+m2_age <- ulam(
   alist(
     # likelihood
     CHD ~ dbern(p), 
-    logit(p) <- a[G]+b_1*(A_c), 
+    logit(p) <- a[G]+b[G]*(A-A_bar), 
     
     # priors
     a[G] ~ dnorm(0,1),
-    b_1 ~ dnorm(0,1)
+    b[G] ~ dnorm(0,1)
     
   ) , 
   data=dat_heart, 
   chains = 4, 
   cores = 4, 
-  file = here("my_scripts/my_models", "assignment4_m2_gender_index")
+  #file = here("my_scripts/my_models", "assignment4_m2_age")
 )
 
-
-# Changing the labels of the gender variable to be able to implement it as 
-# an indicator, gender is 1 if it is a man, 0 if woman, so women is the
-# base group
-dat_heart$G <- ifelse(dat_heart$G==1,1,0)
-
-m2_gender_indicator <- ulam(
-  alist(
-    # likelihood
-    CHD ~ dbern(p) , 
-    logit(p) <- a+b_1*(A_c)+b_2*G, 
-    
-    # priors
-    a ~ dnorm(0,1),
-    b_1 ~ dnorm(0,1),
-    b_2 ~ dnorm(0,1)
-    
-  ) , 
-  data=dat_heart, 
-  chains = 4, 
-  cores = 4, 
-  file = here("my_scripts/my_models", "assignment4_m2_gender_indicator") 
-)
 ```
 
 ```{r}
 # analyse the results here
-# Using the index approach
-# traceplot(m2_gender_index)
-precis(m2_gender_index, depth = 3)
-#a[1] is the intercept for men, a[2] the intercept for women, 
-# and b_1 age coefficient
-inv_logit(coef(m2_gender_index))
+#a[1] is the intercept for men, a[2] the intercept for women
+inv_logit(coef(m2_age)[1])
+inv_logit(coef(m2_age)[2])
 
-# Using the indicator approach
-# traceplot(m2_gender_indicator)
-precis(m2_gender_indicator, depth = 3)
-# intercept for men 
-inv_logit(coef(m2_gender_indicator)[1]+coef(m2_gender_indicator)[3])
-# intercept for women
-inv_logit(coef(m2_gender_indicator)[1])
-# age coefficient
-inv_logit(coef(m2_gender_indicator)[2])
+# Summary table in log odds scale
+precis(m2_age, depth = 3, prob=0.95)
+# Additional year above the average age increases the odds of CHD risks for 
+# MEN change by a factor of 
+exp(coef(m2_age)[3])
+# Additional year above the average age increases the odds of CHD risks for 
+# WOMEN change by a factor of
+exp(coef(m2_age)[4])
 
 ```
 
-Given the positive value of the coefficient for the variable, age does increase the risk for  men and women. For each year above the average age, the risk increases by around 51% for both genders. 
+Age does influence the risk for men and women. Considering an interval of 95%, the values for both coefficients are positive and exclude 0, which can be considered as evidence that age does increase the risk for both genders.  
 
 \newpage
 
@@ -521,9 +494,9 @@ likelihood = function(data, mu, sigma) {
 # also but it is shifted a lot to the right to avoid it taking negative values
 # as much as possible
 # mu ~ N(90, 5)
-# sd ~ N(15, 0.5)
-mu_curr <- 90#rnorm(1, 90, 5)
-sigma_curr <- 12#rnorm(1, 12, 2)
+# sd ~ N(12, 2)
+mu_curr <- rnorm(1, 90, 5)
+sigma_curr <- rnorm(1, 12, 2)
 
 
 # Running the algorithm
@@ -567,6 +540,8 @@ for (i in c(1:iter)){
 
 # Ignore the first 1000 as warm-up period for plotting the posterior
 post_param <- tail(param, 1000)
+mean(post_param$mu)
+mean(post_param$sigma)
 
 # plot of the posterior probability for mu 
 ggplot(post_param, aes(x = mu)) +
