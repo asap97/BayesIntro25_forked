@@ -1,0 +1,214 @@
+---
+title: "Assignment 5"
+subtitle: "Introduction to Bayesian Data Analysis 2025"
+author: 'Student (#StudentID)'
+format: pdf
+editor_options: 
+  chunk_output_type: console
+---
+
+<!--Preamble-->
+
+## Preamble 
+
+  - **Points**: Assignment 5 comprises of 3 tasks, 4 points each (12 in total). Full points are obtained for complete and correct answers---a proportion of the points are obtained for a proper approach or if only part of the task is solved.
+  
+  - **Submission**: Hand in the assignment as a PDF `Markdown` report. The report should show the results, the code that produced the results, and additional text or comment. The report should appear clean and be uploaded on Moodle until Wednesday, July 27, 1:00 pm.
+  
+  - **Collaboration**: Reports can be handed in as team work (max. 2 people). When working in teams, declare this on page 3. However, each collaborator needs to hand in a report via Moodle, stating their name, student number (p. 1), and their machine specification (p. 3).  
+  
+  - **Permitted and Prohibited**: You may use materials from this class (e.g., slides, code on GitHub) as well as online forums such as [Stack Overflow](https://Stackoverflow.com/questions) to write your code. However, you are not allowed to post questions from the assignment online or prompt them (including paraphrases) to LLMs/chatbots. All use of LLMs/chatbots is generally not allowed. Solutions may not be shared with other students from the class (except 1 potential collaborator).
+  
+
+\newpage
+
+## `ulam` and `Quarto`
+
+Running MCMC with `ulam()` takes some time and produces many messages. 
+This can be be annoying when you repeatedly render the `Quarto` document and the goal is to have a clean report. 
+Here are two tips to avoid an ugly document and refitting the model every time you re-render the document. 
+
+1) Write the ulam() model in a separate code chunk with the `echo`, `eval`, `output` settings as below to avoid printing the MCMC progress messages of `ulam()` in the PDF document.
+
+2) Use the `file` argument in `ulam()` to fit the model only once and store the fitting results for reuse. In the code below, `ulam()` first looks into the folder `assignment_5` for a file `m1.rds`--the model fit object `m1`. If the file exists, it loads this file without fitting the model again. If the file does not exist yet, `ulam()` fits the model and stores the fitted object in the respective folder, so it can be reused later. 
+
+```
+#| echo: true
+#| eval: true
+#| output: false
+
+
+m1 <- ulam(
+  model , 
+  data= ... , 
+  chains = ... , 
+  cores = ... , 
+  file = here("assignment_5", "m1")
+)
+
+```
+
+\newpage
+
+
+## Authorship Information
+
+
+```{r}
+#| include: false
+individual <- 'I certify that this assignment represents my own work. I have not used any unauthorized or unacknowledged aids as stated in the preamble, including free or commercial systems or services offered on the internet or text generating systems embedded into software. I did not copy code from someone else nor did I share my code with someone else.' 
+
+collab <- 'I certify that this assignment represents collaborative work by me and my collaborator listed below. I confirm that both contributed equally to this assignment and that we are equally responsible for the entirety of this report that we will receive the same grade on this report. I have not used any unauthorized or unacknowledged aids as stated in the preamble, including free or commercial systems or services offered on the internet or text generating systems embedded into software. I did not copy code nor did I share my code with someone other than my collaborator. I also found no indication for any such misconduct by collaborator.'
+```
+
+
+**1. Declaration of Collaboration**
+
+<!--If you collaborated, set collaboration <- TRUE --> 
+
+```{r}
+#| include: false
+collaboration <- FALSE # FALSE: Individual work; TRUE: Collaboration
+```
+
+<!--If you collaborated, check the 'Yes' box and enter the collaborator name--> 
+
+- [ ] Yes (Collaborator name) 
+- [x] No
+
+
+**2. Declaration of Authorship**
+
+<!--Before handing in the assignment, check the box by adding an 'X" to the box -->
+
+- [ ] `r ifelse(collaboration==FALSE, individual, collab)`
+
+
+**3. System Information**
+
+```{r}
+#| include: false
+info <-sessionInfo()
+time <- Sys.time()
+```
+
+
+- [ ] I confirm that I generated the submitted PDF report myself using `r info$R.version$version.string` and `Quarto`/`RMarkdown`. 
+
+
+Machine stamp: `r info$platform`
+
+Timestamp: `r format(time, "%Y-%m-%d %H:%M:%S %Z")`
+
+\newpage
+
+
+```{r}
+#| echo: true
+#| eval: true
+#| output: false
+
+# load packages here
+```
+
+
+# Task 1 (4 points)
+
+In the simulation below, it is assumed that each of the $i=1,...,100$ subjects is making $j=1,...100$ binary choices $Y \in \{0,1\}$, with the choice probability $P(Y=1)$ depending on $X$, which varies for both subjects and problems.
+Moreover, there might be subject-specific differences in the effect of $X$ as well as the average tendency of choosing $Y=1$. 
+
+```{r}
+n_sub <- 100 # number of subjects
+n_prob <- 100 # number of choice problems
+n_tot <- n_sub*n_prob # total number of choices
+
+X <- matrix(rnorm(n_tot), nrow=n_sub, ncol=n_prob) 
+a_sub <- rnorm(n_sub, 0, 1)
+b_sub <- rnorm(n_sub, 0, .5)
+
+# simulate choice probabilities
+P_Y <- matrix(NA, nrow=n_sub, ncol=n_prob)
+for (i in 1:n_sub){
+  for(j in 1:n_prob){
+    P_Y[i,j] <- plogis(.3 + a_sub[i] + (1.2+b_sub[i])*X[i,j])
+  }
+}
+
+
+data <- data.frame(expand.grid(sub=1:n_sub, 
+                               prob=1:n_prob ) ,
+                   X=round(as.vector(X),3), 
+                   P_Y=round(as.vector(P_Y),3))
+```
+
+```{r}
+head(data, 5)
+tail(data, 5)
+```
+
+
+Use $P(Y)$ to simulate binary choice data $Y$ and estimate a multilevel binomial model that recovers all fixed and random effects that are included in the simulation. 
+Report the posterior summaries of all estimated parameters. 
+
+(*In Task 2, you should conduct a model comparison*).
+
+```{r}
+# write code here
+```
+
+
+
+```{r}
+#| echo: true
+#| eval: true
+#| output: false
+
+# fit model here
+```
+
+```{r}
+# write code here
+```
+
+\newpage
+
+# Task 2 (4 points)
+
+Estimate additional models using the complete pooling approach and the no pooling approach compare all three models. 
+Which model has the highest out-of-sample fit? 
+Explain the results briefly. 
+
+```{r}
+#| echo: true
+#| eval: true
+#| output: false
+
+# fit models here
+```
+
+
+```{r}
+# write code here
+```
+
+\newpage
+
+# Task 3 (4 points)
+
+Adjust the data simulation such that it also entails problem-specific differences in the average tendency of choosing $Y=1$.
+Estimate a multilevel binomial model that recovers all fixed and random effects that are included in the simulation. 
+Report the traceplots and posterior summaries for the model's hyperparameters. 
+
+```{r}
+# write code here
+```
+
+
+```{r}
+# fit model here
+```
+
+```{r}
+# write code here
+```
+
